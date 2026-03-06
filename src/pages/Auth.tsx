@@ -99,9 +99,8 @@ export default function Auth() {
       <Card className="w-full max-w-md bg-card border-border">
         <CardHeader className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-primary" />
-            </div>
+            {/* logo image: put your file in public/ and update the src below */}
+            <img src="/trading-magnifier.png" alt="logo" className="w-10 h-10 rounded-xl" />
             <CardTitle className="text-2xl font-bold text-foreground tracking-tight">PipTracker</CardTitle>
           </div>
           <CardDescription className="text-muted-foreground">
