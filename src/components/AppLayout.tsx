@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, Plus, BookOpen, BarChart3, Calculator, MessageCircle } from "lucide-react";
+import { LayoutDashboard, Plus, BookOpen, BarChart3, Calculator, MessageCircle, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const tabs = [
   { to: "/", icon: LayoutDashboard, label: "Home" },
