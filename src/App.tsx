@@ -12,6 +12,7 @@ import Journal from "@/pages/Journal";
 import Performance from "@/pages/Performance";
 import RiskCalculator from "@/pages/RiskCalculator";
 import AICoach from "@/pages/AICoach";
+import Settings from "@/pages/Settings";
 import Auth from "@/pages/Auth";
 import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
@@ -60,6 +61,7 @@ const App = () => (
                 <Route path="/performance" element={<Performance />} />
                 <Route path="/risk" element={<RiskCalculator />} />
                 <Route path="/coach" element={<AICoach />} />
+                <Route path="/settings" element={<Settings />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
