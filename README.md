@@ -72,6 +72,8 @@ Create a `.env` file in the root directory with your Supabase credentials:
 ```env
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+# optionally set Gemini API key for AI coach
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_key
 ```
 
 ## 📱 Demo

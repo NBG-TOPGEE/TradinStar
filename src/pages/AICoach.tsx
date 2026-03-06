@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTrades } from "@/contexts/TradeContext";
 import { getStats } from "@/lib/trades";
 import { Send, Bot, User, Sparkles } from "lucide-react";
+import { useGemini } from "@/hooks/useGemini";
 
 interface Message {
   role: "user" | "assistant";
@@ -11,6 +12,8 @@ interface Message {
 export default function AICoach() {
   const { trades } = useTrades();
   const stats = getStats(trades);
+  const { chat, analyzeImage, loading: geminiLoading, error: geminiError, SYSTEM_PROMPT } = useGemini();
+
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -61,12 +64,30 @@ export default function AICoach() {
     return `I can help you analyze:\n- **"My performance"** — overall stats\n- **"Emotion analysis"** — how emotions affect results\n- **"Session analysis"** — best trading sessions\n- **"Analyze recent trades"** — review last trades\n\nFor full AI coaching with Gemini, enable Lovable Cloud!`;
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
     const userMsg: Message = { role: "user", content: input };
-    const assistantMsg: Message = { role: "assistant", content: generateLocalResponse(input) };
-    setMessages(prev => [...prev, userMsg, assistantMsg]);
+    setMessages(prev => [...prev, userMsg]);
     setInput("");
+
+    // if Gemini API key is configured, use remote model
+    const key = import.meta.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    if (key) {
+      try {
+        const history = [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...messages,
+          userMsg,
+        ];
+        const responseText = await chat(history as any);
+        setMessages(prev => [...prev, { role: "assistant", content: responseText }]);
+      } catch (err: any) {
+        setMessages(prev => [...prev, { role: "assistant", content: `[error] ${err.message}` }]);
+      }
+    } else {
+      const assistantMsg: Message = { role: "assistant", content: generateLocalResponse(input) };
+      setMessages(prev => [...prev, assistantMsg]);
+    }
   };
 
   return (
@@ -90,18 +111,42 @@ export default function AICoach() {
         ))}
       </div>
 
-      <div className="p-4">
+      <div className="p-4 space-y-2">
+        {geminiError && (
+          <div className="text-sm text-destructive">Error: {geminiError}</div>
+        )}
         <div className="flex gap-2">
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleSend()}
             placeholder="Ask about your trading..."
-            className="flex-1 bg-card border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground"
+            disabled={geminiLoading}
+            className="flex-1 bg-card border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground disabled:opacity-50"
           />
-          <button onClick={handleSend} className="bg-primary text-primary-foreground rounded-xl px-4 py-3">
-            <Send className="w-4 h-4" />
+          <button onClick={handleSend} disabled={geminiLoading} className="bg-primary text-primary-foreground rounded-xl px-4 py-3">
+            {geminiLoading ? "..." : <Send className="w-4 h-4" />}
           </button>
+        </div>
+        <div>
+          <label className="block text-sm mb-1">Upload chart/image</label>
+          <input
+            type="file"
+            accept="image/*"
+            disabled={geminiLoading}
+            onChange={async e => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              setMessages(prev => [...prev, { role: "user", content: "[image sent]" }]);
+              try {
+                const analysis = await analyzeImage(file);
+                setMessages(prev => [...prev, { role: "assistant", content: analysis }]);
+              } catch (err: any) {
+                setMessages(prev => [...prev, { role: "assistant", content: `[error] ${err.message}` }]);
+              }
+            }}
+            className="w-full"
+          />
         </div>
       </div>
     </div>
