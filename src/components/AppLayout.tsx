@@ -38,8 +38,15 @@ export default function AppLayout() {
               <span className="font-medium">{label}</span>
             </NavLink>
           ))}
-        </div>
-      </nav>
-    </div>
+            <button
+              onClick={signOut}
+              className="flex flex-col items-center gap-0.5 px-2 py-2 rounded-lg transition-colors text-xs text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Out</span>
+            </button>
+          </div>
+        </nav>
+      </div>
   );
 }
