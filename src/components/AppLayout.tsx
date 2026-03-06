@@ -12,6 +12,8 @@ const tabs = [
 ];
 
 export default function AppLayout() {
+  const { signOut } = useAuth();
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <div className="flex-1 overflow-y-auto pb-20">
