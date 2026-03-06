@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, Plus, BookOpen, BarChart3, Calculator, MessageCircle, LogOut } from "lucide-react";
+import { LayoutDashboard, Plus, BookOpen, BarChart3, Calculator, MessageCircle, LogOut, Cog } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const tabs = [
@@ -9,6 +9,7 @@ const tabs = [
   { to: "/performance", icon: BarChart3, label: "Stats" },
   { to: "/risk", icon: Calculator, label: "Risk" },
   { to: "/coach", icon: MessageCircle, label: "Coach" },
+  { to: "/settings", icon: Cog, label: "Settings" },
 ];
 
 export default function AppLayout() {
