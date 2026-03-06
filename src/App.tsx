@@ -15,6 +15,8 @@ import AICoach from "@/pages/AICoach";
 import Auth from "@/pages/Auth";
 import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
+import Home from "@/pages/Home";
+import About from "@/pages/About";
 
 const queryClient = new QueryClient();
 
@@ -34,7 +36,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return null;
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
@@ -49,8 +51,10 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/log" element={<LogTrade />} />
                 <Route path="/journal" element={<Journal />} />
                 <Route path="/performance" element={<Performance />} />

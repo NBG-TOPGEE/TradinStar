@@ -3,7 +3,7 @@ import { LayoutDashboard, Plus, BookOpen, BarChart3, Calculator, MessageCircle, 
 import { useAuth } from "@/contexts/AuthContext";
 
 const tabs = [
-  { to: "/", icon: LayoutDashboard, label: "Home" },
+  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/log", icon: Plus, label: "Log" },
   { to: "/journal", icon: BookOpen, label: "Journal" },
   { to: "/performance", icon: BarChart3, label: "Stats" },
@@ -25,7 +25,7 @@ export default function AppLayout() {
             <NavLink
               key={to}
               to={to}
-              end={to === "/"}
+              end={to === "/dashboard"}
               className={({ isActive }) =>
                 `flex flex-col items-center gap-0.5 px-2 py-2 rounded-lg transition-colors text-xs ${
                   isActive

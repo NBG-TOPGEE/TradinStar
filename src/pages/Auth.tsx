@@ -26,7 +26,7 @@ export default function Auth() {
     if (error) {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
-      navigate("/");
+      navigate("/dashboard");
     }
   };
 
@@ -38,7 +38,7 @@ export default function Auth() {
       password,
       options: {
         data: { display_name: displayName },
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: `${window.location.origin}/dashboard`,
       },
     });
     setLoading(false);
