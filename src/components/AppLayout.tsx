@@ -16,38 +16,48 @@ export default function AppLayout() {
   const { signOut } = useAuth();
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <div className="flex-1 overflow-y-auto pb-20">
+    <div className="flex flex-col min-h-screen" style={{ background: "hsl(220,20%,97%)" }}>
+      <div className="flex-1 overflow-y-auto pb-24">
         <Outlet />
       </div>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border backdrop-blur-xl">
-        <div className="flex items-center justify-around max-w-lg mx-auto px-2 py-1">
+
+      {/* Premium bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50" style={{
+        background: "white",
+        borderTop: "1px solid hsl(220,14%,90%)",
+        boxShadow: "0 -4px 24px hsl(222,40%,14%,0.06)"
+      }}>
+        <div className="flex items-center justify-around max-w-lg mx-auto px-1 py-2">
           {tabs.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
               end={to === "/dashboard"}
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-2 py-2 rounded-lg transition-colors text-xs ${
+                `flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all text-xs font-medium ${
                   isActive
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "text-white"
+                    : "text-slate-400 hover:text-slate-600"
                 }`
               }
+              style={({ isActive }) => isActive ? {
+                background: "hsl(222,60%,20%)",
+                padding: "6px 10px",
+              } : {}}
             >
-              <Icon className="w-5 h-5" />
-              <span className="font-medium">{label}</span>
+              <Icon className="w-4 h-4" />
+              <span className="text-[10px] font-semibold">{label}</span>
             </NavLink>
           ))}
-            <button
-              onClick={signOut}
-              className="flex flex-col items-center gap-0.5 px-2 py-2 rounded-lg transition-colors text-xs text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">Out</span>
-            </button>
-          </div>
-        </nav>
-      </div>
+          <button
+            onClick={signOut}
+            className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all text-xs font-medium text-slate-400 hover:text-red-400"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-[10px] font-semibold">Out</span>
+          </button>
+        </div>
+      </nav>
+    </div>
   );
 }
