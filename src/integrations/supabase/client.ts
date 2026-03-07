@@ -2,34 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_URL = "https://lftcimkllwotimqhsooh.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmdGNpbWtsbHdvdGltcWhzb29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3OTk0OTEsImV4cCI6MjA4ODM3NTQ5MX0.U5hpQtCX_xrL_2xyif6TDu_6gRACgx7sxAE5nS-qOB0";
 
-// Validate required environment variables
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  const missingVars: string[] = [];
-  if (!SUPABASE_URL) missingVars.push('VITE_SUPABASE_URL');
-  if (!SUPABASE_PUBLISHABLE_KEY) missingVars.push('VITE_SUPABASE_PUBLISHABLE_KEY');
-  
-  console.error(`\n❌ Missing required environment variables: ${missingVars.join(', ')}\n`);
-  console.error('Please create a .env file in the root directory with your Supabase credentials.');
-  console.error('You can copy from .env.example and fill in your values.\n');
-  console.error('Get your credentials from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api\n');
-  
-  throw new Error(
-    `Missing required environment variables: ${missingVars.join(', ')}. ` +
-    `Please create a .env file with these variables. ` +
-    `See .env.example for reference.`
-  );
-}
-
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
-
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
