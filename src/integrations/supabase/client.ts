@@ -5,6 +5,24 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+// Validate required environment variables
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  const missingVars: string[] = [];
+  if (!SUPABASE_URL) missingVars.push('VITE_SUPABASE_URL');
+  if (!SUPABASE_PUBLISHABLE_KEY) missingVars.push('VITE_SUPABASE_PUBLISHABLE_KEY');
+  
+  console.error(`\n❌ Missing required environment variables: ${missingVars.join(', ')}\n`);
+  console.error('Please create a .env file in the root directory with your Supabase credentials.');
+  console.error('You can copy from .env.example and fill in your values.\n');
+  console.error('Get your credentials from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api\n');
+  
+  throw new Error(
+    `Missing required environment variables: ${missingVars.join(', ')}. ` +
+    `Please create a .env file with these variables. ` +
+    `See .env.example for reference.`
+  );
+}
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
