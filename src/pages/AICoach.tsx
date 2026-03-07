@@ -71,7 +71,7 @@ export default function AICoach() {
     setInput("");
 
     // if Gemini API key is configured, use remote model
-    const key = import.meta.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const key = import.meta.env.VITE_GEMINI_API_KEY;
     if (key) {
       try {
         const history = [
