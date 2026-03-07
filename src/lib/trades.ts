@@ -27,38 +27,47 @@ export interface Trade {
   timestamp: string;
 }
 
-const STORAGE_KEY = "piptracker_trades";
-
-export function loadTrades(): Trade[] {
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
+/** Map a Supabase row (snake_case) to the app Trade interface (camelCase) */
+export function rowToTrade(row: any): Trade {
+  return {
+    id: row.id,
+    pair: row.pair,
+    direction: row.direction as TradeDirection,
+    entryPrice: Number(row.entry_price),
+    exitPrice: Number(row.exit_price),
+    positionSize: Number(row.position_size),
+    session: row.session as TradingSession,
+    strategy: row.strategy as TradingStrategy,
+    emotion: row.emotion as TradeEmotion,
+    confidence: row.confidence,
+    notes: row.notes ?? "",
+    screenshot: row.screenshot ?? undefined,
+    pnl: Number(row.pnl),
+    pips: Number(row.pips),
+    timestamp: row.created_at,
+  };
 }
 
-export function saveTrades(trades: Trade[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(trades));
-}
-
-export function addTrade(trade: Trade): Trade[] {
-  const trades = loadTrades();
-  trades.unshift(trade);
-  saveTrades(trades);
-  return trades;
-}
-
-export function updateTrade(id: string, updates: Partial<Trade>): Trade[] {
-  const trades = loadTrades().map(t => t.id === id ? { ...t, ...updates } : t);
-  saveTrades(trades);
-  return trades;
-}
-
-export function deleteTrade(id: string): Trade[] {
-  const trades = loadTrades().filter(t => t.id !== id);
-  saveTrades(trades);
-  return trades;
+/** Map the app Trade interface to a Supabase insert payload */
+export function tradeToRow(trade: Trade, userId: string) {
+  return {
+    id: trade.id,
+    user_id: userId,
+    pair: trade.pair,
+    direction: trade.direction,
+    entry_price: trade.entryPrice,
+    exit_price: trade.exitPrice,
+    position_size: trade.positionSize,
+    session: trade.session,
+    strategy: trade.strategy,
+    emotion: trade.emotion,
+    confidence: trade.confidence,
+    notes: trade.notes,
+    screenshot: trade.screenshot ?? null,
+    pnl: trade.pnl,
+    pips: trade.pips,
+    created_at: trade.timestamp,
+  };
 }
 
 export function calculatePnL(
@@ -72,7 +81,6 @@ export function calculatePnL(
 
   const isJPY = pair.includes("JPY");
   const pipMultiplier = isJPY ? 100 : 10000;
-  const pipValue = isJPY ? 0.01 : 0.0001;
 
   let pips: number;
   if (direction === "long") {
@@ -81,7 +89,6 @@ export function calculatePnL(
     pips = (entry - exit) * pipMultiplier;
   }
 
-  // Simplified PnL: for forex standard lot = $10/pip, for crypto/indices use direct calc
   const isCrypto = pair.includes("BTC") || pair.includes("ETH") || pair.includes("SOL");
   const isIndex = ["US30", "SPX500", "NAS100"].includes(pair);
 
@@ -89,7 +96,7 @@ export function calculatePnL(
   if (isCrypto || isIndex) {
     pnl = direction === "long" ? (exit - entry) * size : (entry - exit) * size;
   } else {
-    pnl = pips * size * 10; // standard lot pip value ~$10
+    pnl = pips * size * 10;
   }
 
   return { pnl: Math.round(pnl * 100) / 100, pips: Math.round(pips * 10) / 10 };

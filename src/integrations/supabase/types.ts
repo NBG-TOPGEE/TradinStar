@@ -44,6 +44,63 @@ export type Database = {
         }
         Relationships: []
       }
+      trades: {
+        Row: {
+          confidence: number
+          created_at: string
+          direction: string
+          emotion: string
+          entry_price: number
+          exit_price: number
+          id: string
+          notes: string
+          pair: string
+          pips: number
+          pnl: number
+          position_size: number
+          screenshot: string | null
+          session: string
+          strategy: string
+          user_id: string
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          direction: string
+          emotion: string
+          entry_price: number
+          exit_price: number
+          id?: string
+          notes?: string
+          pair: string
+          pips?: number
+          pnl?: number
+          position_size: number
+          screenshot?: string | null
+          session: string
+          strategy: string
+          user_id: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          direction?: string
+          emotion?: string
+          entry_price?: number
+          exit_price?: number
+          id?: string
+          notes?: string
+          pair?: string
+          pips?: number
+          pnl?: number
+          position_size?: number
+          screenshot?: string | null
+          session?: string
+          strategy?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

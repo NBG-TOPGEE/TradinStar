@@ -27,11 +27,11 @@ export default function LogTrade() {
 
   const calc = useMemo(() => calculatePnL(pair, direction, parseFloat(entryPrice) || 0, parseFloat(exitPrice) || 0, parseFloat(positionSize) || 0), [pair, direction, entryPrice, exitPrice, positionSize]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!entryPrice || !exitPrice || !positionSize) { toast.error("Please fill in all price fields"); return; }
-    addTrade({ id: crypto.randomUUID(), pair, direction, entryPrice: parseFloat(entryPrice), exitPrice: parseFloat(exitPrice), positionSize: parseFloat(positionSize), session, strategy, emotion, confidence, notes, pnl: calc.pnl, pips: calc.pips, timestamp: new Date().toISOString() });
+    await addTrade({ id: crypto.randomUUID(), pair, direction, entryPrice: parseFloat(entryPrice), exitPrice: parseFloat(exitPrice), positionSize: parseFloat(positionSize), session, strategy, emotion, confidence, notes, pnl: calc.pnl, pips: calc.pips, timestamp: new Date().toISOString() });
     toast.success("Trade logged!");
-    navigate("/");
+    navigate("/dashboard");
   };
 
   const inputClass = "w-full bg-white border border-slate-200 rounded-xl px-3.5 py-3 text-sm font-mono text-slate-800 placeholder:text-slate-300 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-all";
