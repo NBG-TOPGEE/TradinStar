@@ -1,10 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTrades } from "@/contexts/TradeContext";
 import { Trade, TradeDirection, TradingSession, TradingStrategy, TradeEmotion, TRADING_PAIRS, calculatePnL } from "@/lib/trades";
-import { Star, ArrowUp, ArrowDown, ChevronLeft } from "lucide-react";
+import { Star, ArrowUp, ArrowDown, ChevronLeft, Upload, Clipboard, X, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SESSIONS: TradingSession[] = ["Sydney", "Tokyo", "London", "New York"];
 const STRATEGIES: TradingStrategy[] = ["Breakout", "Trend", "Scalp", "Reversal", "News", "Support/Resistance"];
@@ -13,7 +15,10 @@ const EMOTION_EMOJI: Record<TradeEmotion, string> = { Fearful: "😰", Neutral: 
 
 export default function LogTrade() {
   const { addTrade } = useTrades();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [pair, setPair] = useState(TRADING_PAIRS[0]);
   const [direction, setDirection] = useState<TradeDirection>("long");
   const [entryPrice, setEntryPrice] = useState("");
@@ -24,12 +29,85 @@ export default function LogTrade() {
   const [emotion, setEmotion] = useState<TradeEmotion>("Neutral");
   const [confidence, setConfidence] = useState(3);
   const [notes, setNotes] = useState("");
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const calc = useMemo(() => calculatePnL(pair, direction, parseFloat(entryPrice) || 0, parseFloat(exitPrice) || 0, parseFloat(positionSize) || 0), [pair, direction, entryPrice, exitPrice, positionSize]);
 
+  const processImageFile = useCallback((file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Please upload an image file"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Image must be under 10MB"); return; }
+    setScreenshotFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => setScreenshotPreview(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processImageFile(file);
+  };
+
+  const handlePaste = useCallback(async () => {
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const imageType = item.types.find(t => t.startsWith("image/"));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          const file = new File([blob], "pasted-chart.png", { type: imageType });
+          processImageFile(file);
+          toast.success("Chart pasted!");
+          return;
+        }
+      }
+      toast.error("No image found in clipboard");
+    } catch {
+      toast.error("Clipboard access denied. Try uploading instead.");
+    }
+  }, [processImageFile]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processImageFile(file);
+  }, [processImageFile]);
+
+  const uploadScreenshot = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    const ext = file.name.split(".").pop() || "png";
+    const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("screenshots").upload(path, file, { cacheControl: "3600", upsert: false });
+    if (error) { console.error(error); return null; }
+    const { data } = supabase.storage.from("screenshots").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
   const handleSubmit = async () => {
     if (!entryPrice || !exitPrice || !positionSize) { toast.error("Please fill in all price fields"); return; }
-    await addTrade({ id: crypto.randomUUID(), pair, direction, entryPrice: parseFloat(entryPrice), exitPrice: parseFloat(exitPrice), positionSize: parseFloat(positionSize), session, strategy, emotion, confidence, notes, pnl: calc.pnl, pips: calc.pips, timestamp: new Date().toISOString() });
+    setUploading(true);
+    let screenshotUrl: string | undefined;
+    if (screenshotFile) {
+      const url = await uploadScreenshot(screenshotFile);
+      if (url) {
+        screenshotUrl = url;
+      } else {
+        screenshotUrl = screenshotPreview ?? undefined;
+        toast.warning("Using local image storage");
+      }
+    }
+    await addTrade({
+      id: crypto.randomUUID(), pair, direction,
+      entryPrice: parseFloat(entryPrice), exitPrice: parseFloat(exitPrice),
+      positionSize: parseFloat(positionSize), session, strategy, emotion,
+      confidence, notes, screenshot: screenshotUrl,
+      pnl: calc.pnl, pips: calc.pips,
+      timestamp: new Date().toISOString(),
+    });
+    setUploading(false);
     toast.success("Trade logged!");
     navigate("/dashboard");
   };
@@ -46,11 +124,9 @@ export default function LogTrade() {
         <h1 className="text-xl font-bold text-slate-800">Log Trade</h1>
       </div>
 
-      {/* Live P&L banner */}
       {(entryPrice && exitPrice && positionSize) && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className={`rounded-2xl p-4 mb-6 border ${calc.pnl >= 0 ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"}`}
-        >
+          className={`rounded-2xl p-4 mb-6 border ${calc.pnl >= 0 ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"}`}>
           <div className="flex justify-between items-center">
             <div>
               <p className="text-xs text-slate-500 font-medium">Estimated P&L</p>
@@ -69,7 +145,6 @@ export default function LogTrade() {
       )}
 
       <div className="space-y-5">
-        {/* Pair */}
         <div>
           <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Trading Pair</label>
           <select value={pair} onChange={e => setPair(e.target.value)} className={selectClass}>
@@ -77,7 +152,6 @@ export default function LogTrade() {
           </select>
         </div>
 
-        {/* Direction */}
         <div>
           <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Direction</label>
           <div className="grid grid-cols-2 gap-2">
@@ -94,7 +168,6 @@ export default function LogTrade() {
           </div>
         </div>
 
-        {/* Prices */}
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Entry Price</label>
@@ -106,13 +179,11 @@ export default function LogTrade() {
           </div>
         </div>
 
-        {/* Position Size */}
         <div>
           <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Position Size (Lots)</label>
           <input type="number" step="any" value={positionSize} onChange={e => setPositionSize(e.target.value)} placeholder="1.0" className={inputClass} />
         </div>
 
-        {/* Session */}
         <div>
           <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Session</label>
           <div className="grid grid-cols-4 gap-2">
@@ -126,7 +197,6 @@ export default function LogTrade() {
           </div>
         </div>
 
-        {/* Strategy */}
         <div>
           <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Strategy</label>
           <div className="grid grid-cols-3 gap-2">
@@ -140,7 +210,6 @@ export default function LogTrade() {
           </div>
         </div>
 
-        {/* Emotion */}
         <div>
           <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Emotional State</label>
           <div className="grid grid-cols-4 gap-2">
@@ -154,7 +223,6 @@ export default function LogTrade() {
           </div>
         </div>
 
-        {/* Confidence */}
         <div>
           <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Confidence</label>
           <div className="flex gap-1">
@@ -166,16 +234,71 @@ export default function LogTrade() {
           </div>
         </div>
 
-        {/* Notes */}
+        {/* Chart Screenshot */}
+        <div>
+          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">
+            Chart Screenshot <span className="text-slate-300 font-normal normal-case">(optional)</span>
+          </label>
+
+          {screenshotPreview ? (
+            <div className="relative rounded-xl overflow-hidden border border-slate-200">
+              <img src={screenshotPreview} alt="Chart preview" className="w-full h-40 object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <button
+                onClick={() => { setScreenshotPreview(null); setScreenshotFile(null); }}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-all">
+                <X className="w-3.5 h-3.5" />
+              </button>
+              <div className="absolute bottom-2 left-3 text-white text-xs font-medium opacity-80">
+                ✓ Chart ready
+              </div>
+            </div>
+          ) : (
+            <div
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-xl p-5 transition-all ${isDragging ? "border-blue-400 bg-blue-50" : "border-slate-200 bg-slate-50/50"}`}>
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center">
+                  <ImageIcon className="w-5 h-5 text-slate-400" />
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-medium text-slate-600">Drop your chart here</p>
+                  <p className="text-xs text-slate-400 mt-0.5">PNG, JPG up to 10MB</p>
+                </div>
+                <div className="flex gap-2 w-full">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-all">
+                    <Upload className="w-3.5 h-3.5" /> Upload
+                  </button>
+                  <button
+                    onClick={handlePaste}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-all">
+                    <Clipboard className="w-3.5 h-3.5" /> Paste
+                  </button>
+                </div>
+              </div>
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+            </div>
+          )}
+        </div>
+
         <div>
           <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Notes</label>
           <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} placeholder="Observations, lessons, mistakes..." className={`${inputClass} resize-none font-sans`} />
         </div>
 
-        <button onClick={handleSubmit}
-          className="w-full text-white rounded-2xl py-4 font-bold text-sm mt-2 transition-all active:scale-[0.98]"
+        <button onClick={handleSubmit} disabled={uploading}
+          className="w-full text-white rounded-2xl py-4 font-bold text-sm mt-2 transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
           style={{ background: "hsl(222,60%,20%)", boxShadow: "0 4px 14px hsl(222,60%,20%,0.3)" }}>
-          Save Trade
+          {uploading ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Saving...
+            </>
+          ) : "Save Trade"}
         </button>
       </div>
       <div className="h-8" />
