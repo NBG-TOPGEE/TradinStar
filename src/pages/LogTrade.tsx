@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTrades } from "@/contexts/TradeContext";
-import { Trade, TradeDirection, TradingSession, TradingStrategy, TradeEmotion, TRADING_PAIRS, calculatePnL } from "@/lib/trades";
+import { Trade, TradeDirection, TradingSession, TradingStrategy, TradeEmotion, TRADING_PAIRS, MARKET_PAIRS, MarketType, calculatePnL } from "@/lib/trades";
 import { Star, ArrowUp, ArrowDown, ChevronLeft, Upload, Clipboard, X, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -20,6 +20,7 @@ export default function LogTrade() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [pair, setPair] = useState(TRADING_PAIRS[0]);
+  const [marketType, setMarketType] = useState<MarketType>("Forex");
   const [direction, setDirection] = useState<TradeDirection>("long");
   const [entryPrice, setEntryPrice] = useState("");
   const [exitPrice, setExitPrice] = useState("");
@@ -146,9 +147,19 @@ export default function LogTrade() {
 
       <div className="space-y-5">
         <div>
+          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Market Type</label>
+          <div className="grid grid-cols-4 gap-2 mb-3">
+            {(["Forex", "Crypto", "Indices", "Commodities"] as MarketType[]).map(m => (
+              <button key={m} onClick={() => { setMarketType(m); setPair(MARKET_PAIRS[m][0]); }}
+                className={`py-2 rounded-xl text-xs font-semibold transition-all ${marketType === m ? "text-white" : "bg-white border border-slate-200 text-slate-500"}`}
+                style={marketType === m ? { background: "hsl(217,90%,56%)" } : {}}>
+                {m === "Forex" ? "🌍" : m === "Crypto" ? "₿" : m === "Indices" ? "📈" : "🏅"} {m}
+              </button>
+            ))}
+          </div>
           <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Trading Pair</label>
           <select value={pair} onChange={e => setPair(e.target.value)} className={selectClass}>
-            {TRADING_PAIRS.map(p => <option key={p}>{p}</option>)}
+            {MARKET_PAIRS[marketType].map(p => <option key={p}>{p}</option>)}
           </select>
         </div>
 

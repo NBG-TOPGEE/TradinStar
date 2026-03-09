@@ -3,11 +3,30 @@ export type TradingSession = "Sydney" | "Tokyo" | "London" | "New York";
 export type TradingStrategy = "Breakout" | "Trend" | "Scalp" | "Reversal" | "News" | "Support/Resistance";
 export type TradeEmotion = "Fearful" | "Neutral" | "Confident" | "Greedy";
 
-export const TRADING_PAIRS = [
-  "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD", "NZD/USD",
-  "BTC/USD", "ETH/USD", "SOL/USD",
-  "US30", "SPX500", "NAS100",
-];
+export type MarketType = "Forex" | "Crypto" | "Indices" | "Commodities";
+
+export const MARKET_PAIRS: Record<MarketType, string[]> = {
+  Forex: [
+    "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD", "NZD/USD",
+    "USD/CHF", "EUR/GBP", "EUR/JPY", "GBP/JPY", "AUD/JPY", "CAD/JPY",
+    "EUR/AUD", "GBP/AUD", "EUR/CAD", "GBP/CAD", "AUD/CAD", "NZD/JPY",
+    "EUR/NZD", "GBP/NZD",
+  ],
+  Crypto: [
+    "BTC/USD", "ETH/USD", "SOL/USD", "BNB/USD", "XRP/USD", "ADA/USD",
+    "DOGE/USD", "AVAX/USD", "DOT/USD", "MATIC/USD", "LTC/USD", "LINK/USD",
+  ],
+  Indices: [
+    "US30", "SPX500", "NAS100", "UK100", "GER40", "FRA40",
+    "AUS200", "JPN225", "HK50", "ESP35",
+  ],
+  Commodities: [
+    "XAU/USD", "XAG/USD", "WTI/OIL", "BRENT/OIL", "NAT/GAS",
+    "COPPER", "PLATINUM", "PALLADIUM",
+  ],
+};
+
+export const TRADING_PAIRS = Object.values(MARKET_PAIRS).flat();
 
 export interface Trade {
   id: string;
