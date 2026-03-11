@@ -18,6 +18,8 @@ import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
+import Admin from "@/pages/Admin";
+{ import.meta.env.DEV && <Route path="/admin" element={<Admin />} /> }
 
 const queryClient = new QueryClient();
 
@@ -62,7 +64,7 @@ const App = () => (
                 <Route path="/risk" element={<RiskCalculator />} />
                 <Route path="/coach" element={<AICoach />} />
                 <Route path="/settings" element={<Settings />} />
-              </Route>
+                {import.meta.env.DEV && <Route path="/admin" element={<Admin />} />}              </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

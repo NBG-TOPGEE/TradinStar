@@ -102,7 +102,7 @@ export default function Auth() {
           <div className="flex items-center justify-center gap-2">
             {/* logo image: put your file in public/ and update the src below */}
             <img src="/trading-magnifier.png" alt="logo" className="w-10 h-10 rounded-xl" />
-            <CardTitle className="text-2xl font-bold text-foreground tracking-tight">PipTracker</CardTitle>
+            <CardTitle className="text-2xl font-bold text-foreground tracking-tight">TradinStar</CardTitle>
           </div>
           <CardDescription className="text-muted-foreground">
             {isLogin ? "Welcome back, trader" : "Create your trading journal"}

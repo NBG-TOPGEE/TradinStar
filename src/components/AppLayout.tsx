@@ -28,7 +28,7 @@ export default function AppLayout() {
               style={{ background: "hsl(222,60%,20%)" }}>
               <TrendingUp className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-slate-800 tracking-tight">PipTracker</span>
+            <span className="font-bold text-slate-800 tracking-tight">TradinStar</span>
           </div>
 
           {/* Right actions */}

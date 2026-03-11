@@ -169,7 +169,7 @@ export default function Settings() {
 
   const handleDeleteAccount = async () => {
     if (deleteConfirm !== "DELETE") return toast.error("Type DELETE to confirm");
-    toast.error("Contact support@piptracker.com to delete your account.");
+    toast.error("Contact support@tradinstar.com to delete your account.");
     setDeleteConfirm("");
   };
 

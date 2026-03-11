@@ -27,7 +27,7 @@ export default function ShareCard({ trade, onClose }: ShareCardProps) {
         logging: false,
       });
       const link = document.createElement("a");
-      link.download = `piptracker-${trade.pair.replace("/", "")}-${Date.now()}.png`;
+      link.download = `tradinstar-${trade.pair.replace("/", "")}-${Date.now()}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
       toast.success("Trade card saved!");
@@ -50,7 +50,7 @@ export default function ShareCard({ trade, onClose }: ShareCardProps) {
         if (!blob) return;
         if (navigator.share) {
           const file = new File([blob], "trade.png", { type: "image/png" });
-          await navigator.share({ files: [file], title: `${trade.pair} Trade`, text: `${trade.pair} ${trade.direction.toUpperCase()} ${isWin ? "+" : ""}$${trade.pnl.toFixed(2)} — via PipTracker` });
+          await navigator.share({ files: [file], title: `${trade.pair} Trade`, text: `${trade.pair} ${trade.direction.toUpperCase()} ${isWin ? "+" : ""}$${trade.pnl.toFixed(2)} — via TradinStar` });
         } else {
           handleDownload();
         }
@@ -225,7 +225,7 @@ export default function ShareCard({ trade, onClose }: ShareCardProps) {
                 </span>
               </div>
               <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.5px" }}>
-                piptracker.com
+                tradinstar.com
               </span>
             </div>
           </div>

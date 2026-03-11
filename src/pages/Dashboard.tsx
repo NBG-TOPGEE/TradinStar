@@ -56,7 +56,7 @@ export default function Dashboard() {
           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "hsl(222,60%,20%)" }}>
             <Zap className="w-3.5 h-3.5 text-white" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: "hsl(222,25%,10%)" }}>PipTracker</h1>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: "hsl(222,25%,10%)" }}>TradinStar</h1>
         </div>
         <p className="text-sm text-slate-500 ml-9">Your trading dashboard</p>
       </motion.div>

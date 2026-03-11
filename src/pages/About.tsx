@@ -11,7 +11,7 @@ export default function About() {
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-4xl mx-auto">
           <Badge variant="secondary" className="mb-4">
-            About PipTracker
+            About TradinStar
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Empowering Traders with AI-Driven Insights
@@ -120,7 +120,7 @@ export default function About() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">What Makes Us Different</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Unlike basic spreadsheets or generic trading apps, PipTracker combines comprehensive tools with AI intelligence for a complete trading solution.
+            Unlike basic spreadsheets or generic trading apps, TradinStar combines comprehensive tools with AI intelligence for a complete trading solution.
           </p>
         </div>
         <div className="grid md:grid-cols-2 gap-8">
@@ -164,7 +164,7 @@ export default function About() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Our Team</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            PipTracker was founded by experienced traders and developers who understand the challenges of consistent profitability in financial markets.
+            TradinStar was founded by experienced traders and developers who understand the challenges of consistent profitability in financial markets.
           </p>
         </div>
         <div className="max-w-2xl mx-auto text-center">
@@ -214,11 +214,11 @@ export default function About() {
         <div className="text-center max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold mb-4">Get In Touch</h2>
           <p className="text-muted-foreground mb-8">
-            Have questions about PipTracker? We'd love to hear from you and help you on your trading journey.
+            Have questions about TradinStar? We'd love to hear from you and help you on your trading journey.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild variant="outline" size="lg">
-              <a href="mailto:support@piptracker.com">
+              <a href="mailto:support@tradinstar.com">
                 <Mail className="w-4 h-4 mr-2" />
                 Contact Support
               </a>
@@ -235,14 +235,14 @@ export default function About() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <h3 className="font-semibold">PipTracker</h3>
+              <h3 className="font-semibold">TradinStar</h3>
               <p className="text-sm text-muted-foreground">AI-Powered Trading Journal</p>
             </div>
             <div className="flex gap-6">
               <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
                 Home
               </Link>
-              <a href="mailto:support@piptracker.com" className="text-sm text-muted-foreground hover:text-foreground">
+              <a href="mailto:support@tradinstar.com" className="text-sm text-muted-foreground hover:text-foreground">
                 Contact
               </a>
             </div>

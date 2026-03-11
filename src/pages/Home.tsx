@@ -12,7 +12,7 @@ const features = [
 
 const testimonials = [
   { name: "Marcus T.", role: "Forex Trader · 3 yrs", text: "My win rate went from 48% to 67% in 2 months. The AI coach spotted that I was overtrading the New York open.", stars: 5 },
-  { name: "Priya K.", role: "Prop Firm Trader", text: "PipTracker is the only journal that actually tells me WHY I'm losing, not just that I am. Game changer for my FTMO prep.", stars: 5 },
+  { name: "Priya K.", role: "Prop Firm Trader", text: "TradinStar is the only journal that actually tells me WHY I'm losing, not just that I am. Game changer for my FTMO prep.", stars: 5 },
   { name: "James O.", role: "Swing Trader", text: "The screenshot feature is brilliant. I can review my exact setup context months later instead of relying on memory.", stars: 5 },
 ];
 
@@ -27,12 +27,12 @@ export default function Home() {
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "hsl(222,60%,20%)" }}>
               <TrendingUp className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-slate-900 text-lg tracking-tight">PipTracker</span>
+            <span className="font-bold text-slate-900 text-lg tracking-tight">TradinStar</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">Features</a>
             <a href="#testimonials" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">Reviews</a>
-            <a href="mailto:support@piptracker.com" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">Support</a>
+            <a href="mailto:support@tradinstar.com" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">Support</a>
           </div>
           <div className="flex items-center gap-3">
             <Link to="/auth" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
@@ -64,7 +64,7 @@ export default function Home() {
           </h1>
 
           <p className="text-lg text-slate-500 mb-8 max-w-2xl mx-auto leading-relaxed">
-            PipTracker logs your trades, analyzes your patterns, and gives you an AI coach that speaks plainly — so you can fix what's wrong and trade with real confidence.
+            TradinStar logs your trades, analyzes your patterns, and gives you an AI coach that speaks plainly — so you can fix what's wrong and trade with real confidence.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
@@ -93,7 +93,7 @@ export default function Home() {
                 <div className="w-3 h-3 rounded-full bg-green-500/60" />
               </div>
               <div className="flex-1 mx-4 bg-slate-700 rounded-md h-6 flex items-center px-3">
-                <span className="text-xs text-slate-400">app.piptracker.com/dashboard</span>
+                <span className="text-xs text-slate-400">app.tradinstar.com/dashboard</span>
               </div>
             </div>
             {/* Dashboard preview */}
@@ -194,7 +194,7 @@ export default function Home() {
                 A coach that's studied every trade you've ever made
               </h2>
               <p className="text-slate-500 leading-relaxed mb-8">
-                Most journals show you the numbers. PipTracker tells you what they mean — and what to do about it. The AI analyzes your patterns and gives you specific, actionable advice in plain English.
+                Most journals show you the numbers. TradinStar tells you what they mean — and what to do about it. The AI analyzes your patterns and gives you specific, actionable advice in plain English.
               </p>
               <div className="space-y-3">
                 {[
@@ -300,8 +300,8 @@ export default function Home() {
                       <span>RR <span className="text-slate-300 font-mono">1:2.4</span></span>
                     </div>
                     <div className="pt-3 border-t border-slate-700 flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 tracking-widest">PIPTRACKER</span>
-                      <span className="text-xs text-slate-600">piptracker.com</span>
+                      <span className="text-xs font-bold text-slate-400 tracking-widest">TRADINSTAR</span>
+                      <span className="text-xs text-slate-600">tradinstar.com</span>
                     </div>
                   </div>
                 </div>
@@ -371,7 +371,7 @@ export default function Home() {
             Ready to trade with clarity?
           </h2>
           <p className="text-slate-500 mb-8 leading-relaxed">
-            Join thousands of traders using PipTracker to understand their performance, fix their habits, and build real consistency.
+            Join thousands of traders using TradinStar to understand their performance, fix their habits, and build real consistency.
           </p>
           <Link to="/auth"
             className="inline-flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-xl transition-all hover:opacity-90 text-base"
@@ -390,14 +390,14 @@ export default function Home() {
               <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "hsl(222,60%,20%)" }}>
                 <TrendingUp className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="font-semibold text-slate-800">PipTracker</span>
+              <span className="font-semibold text-slate-800">TradinStar</span>
               <span className="text-slate-300 text-sm">·</span>
               <span className="text-sm text-slate-400">AI-Powered Trading Journal</span>
             </div>
             <div className="flex gap-6">
               <Link to="/about" className="text-sm text-slate-400 hover:text-slate-700 transition-colors">About</Link>
-              <a href="mailto:support@piptracker.com" className="text-sm text-slate-400 hover:text-slate-700 transition-colors">Support</a>
-              <span className="text-sm text-slate-400">© 2026 PipTracker</span>
+              <a href="mailto:support@tradinstar.com" className="text-sm text-slate-400 hover:text-slate-700 transition-colors">Support</a>
+              <span className="text-sm text-slate-400">© 2026 TradinStar</span>
             </div>
           </div>
         </div>
