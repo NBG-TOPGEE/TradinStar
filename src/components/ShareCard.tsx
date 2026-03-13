@@ -221,7 +221,7 @@ export default function ShareCard({ trade, onClose }: ShareCardProps) {
                   }} />
                 </div>
                 <span style={{ fontSize: "12px", fontWeight: "700", color: "#fff", letterSpacing: "1px" }}>
-                  PIP<span style={{ color: "#f5a623" }}>TRACKER</span>
+                  TRADIN<span style={{ color: "#f5a623" }}>STAR</span>
                 </span>
               </div>
               <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.5px" }}>

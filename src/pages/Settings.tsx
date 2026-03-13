@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Cog, User, DollarSign, TrendingUp, Bell, Brain, Shield,
-  Save, ChevronRight, AlertTriangle, Trash2, KeyRound, Mail
+  Save, ChevronRight, AlertTriangle, Trash2, KeyRound, Mail, LogOut
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const TIMEZONES = [
   "UTC", "America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles",
@@ -36,7 +37,13 @@ const NAV: { id: Section; label: string; icon: any }[] = [
 
 export default function Settings() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [active, setActive] = useState<Section>("profile");
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/auth");
+  };
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -451,6 +458,22 @@ export default function Settings() {
                 className="w-full text-white rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 transition-all"
                 style={{ background: "hsl(222,60%,20%)" }}>
                 <KeyRound className="w-4 h-4" /> Update Password
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden mb-4" style={{ boxShadow: "0 1px 4px hsl(220,14%,10%,0.07)" }}>
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
+                <LogOut className="w-4 h-4 text-slate-500" />
+              </div>
+              <p className="font-semibold text-slate-800 text-sm">Sign Out</p>
+            </div>
+            <div className="p-5">
+              <p className="text-xs text-slate-400 mb-3">Sign out of your TradinStar account on this device.</p>
+              <button onClick={handleLogout}
+                className="w-full border border-slate-200 text-slate-700 hover:bg-red-50 hover:border-red-200 hover:text-red-600 rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 transition-all">
+                <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </div>
           </div>
