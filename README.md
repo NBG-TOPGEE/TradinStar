@@ -1,4 +1,4 @@
-# PipTracker - AI-Powered Trading Journal
+# TradinStar - AI-Powered Trading Journal
 
 Master your trading with intelligent analysis, personalized AI coaching, and comprehensive performance tracking.
 
@@ -7,9 +7,9 @@ Master your trading with intelligent analysis, personalized AI coaching, and com
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org)
 [![Vite](https://img.shields.io/badge/Vite-5.4-green)](https://vitejs.dev)
 
-## 🚀 What is PipTracker?
+## 🚀 What is TradinStar?
 
-PipTracker is an AI-powered trading journal designed for serious traders who want to improve their performance through data-driven insights. Track every trade, analyze your performance, and get personalized coaching from AI to maximize your profits.
+TradinStar is an AI-powered trading journal designed for serious traders who want to improve their performance through data-driven insights. Track every trade, analyze your performance, and get personalized coaching from AI to maximize your profits.
 
 ## ✨ Key Features
 
@@ -26,7 +26,7 @@ Calculate position sizes, risk-reward ratios, and stop-loss levels before enteri
 Visualize your trading performance with detailed charts, win rates, and profit/loss analysis. Understand what's working and what needs improvement.
 
 ### 📔 Journal Insights
-Review your trading journal with advanced filtering and search to identify patterns. Discover your strengths and weaknesses through comprehensive data analysis.
+Review your trading journal with advanced filtering and search to identify patterns. Find your strengths and weaknesses through comprehensive data analysis.
 
 ### 🔒 Secure & Private
 Your trading data is encrypted and stored securely. Focus on trading, not data security.
@@ -61,62 +61,3 @@ npm install
 
 # Start development server
 npm run dev
-```
-
-The app will be available at `http://localhost:5173`
-
-### Environment Setup
-
-Create a `.env` file in the root directory with your Supabase credentials:
-
-```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-# optionally set Gemini API key for AI coach
-NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_key
-```
-
-## 📱 Demo
-
-Visit our live demo to see PipTracker in action:
-
-1. Sign up for a free account
-2. Start logging your trades
-3. Get AI-powered insights
-4. Track your performance over time
-
-## 🔐 Privacy & Security
-
-Your trading data is our top priority. We implement industry-standard security measures:
-
-- All data encrypted in transit and at rest
-- Supabase enterprise-grade infrastructure
-- Automatic backups and monitoring
-- GDPR compliant
-- No third-party data sharing
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-Have questions? We'd love to help you on your trading journey.
-
-- Email: support@piptracker.com
-- Website: https://piptracker.com
-
----
-
-**Note**: This project is for educational purposes. Trading involves risk. Always do your own research before making investment decisions.
-
