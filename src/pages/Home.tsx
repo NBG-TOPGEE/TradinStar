@@ -394,10 +394,15 @@ export default function Home() {
               <span className="text-slate-300 text-sm">·</span>
               <span className="text-sm text-slate-400">AI-Powered Trading Journal</span>
             </div>
-            <div className="flex gap-6">
+            <div className="flex items-center gap-6">
               <Link to="/about" className="text-sm text-slate-400 hover:text-slate-700 transition-colors">About</Link>
               <a href="mailto:support@tradinstar.com" className="text-sm text-slate-400 hover:text-slate-700 transition-colors">Support</a>
               <span className="text-sm text-slate-400">© 2026 TradinStar</span>
+              <span className="text-slate-200">·</span>
+              <span className="text-xs text-slate-400">
+                Built by{" "}
+                <span className="font-semibold text-slate-600 uppercase tracking-widest text-[11px]">VYBE STACK</span>
+              </span>
             </div>
           </div>
         </div>

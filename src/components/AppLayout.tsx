@@ -71,6 +71,15 @@ export default function AppLayout() {
         <Outlet />
       </div>
 
+      {/* ── VYBE STACK CREDIT ── */}
+      {!hideNav && (
+        <div className="text-center pb-1 pt-0.5" style={{ position: "fixed", bottom: "64px", left: 0, right: 0, zIndex: 49, pointerEvents: "none" }}>
+          <span className="text-[9px] tracking-widest font-medium" style={{ color: "hsl(222,20%,70%)" }}>
+            BUILT BY VYBE STACK
+          </span>
+        </div>
+      )}
+
       {/* ── BOTTOM NAV ── */}
       {!hideNav && (
         <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100"

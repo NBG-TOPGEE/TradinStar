@@ -1,250 +1,201 @@
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Target, Brain, Users, Shield, Mail, Lock } from "lucide-react";
+import { TrendingUp, ArrowRight, Zap, Shield, Users, Mail } from "lucide-react";
+
+const timeline = [
+  {
+    year: "The Problem",
+    title: "Losing without knowing why",
+    desc: "Most traders keep losing not because of bad strategies — but because they never truly study themselves. Spreadsheets are tedious. Generic apps don't talk back. The patterns that are costing you money stay hidden.",
+  },
+  {
+    year: "The Insight",
+    title: "Data + AI = a real coach",
+    desc: "When you combine every trade you've ever made with an AI that can actually read patterns, something clicks. Not just 'your win rate is 48%' — but 'you lose 80% of trades you enter in the first 15 minutes of the NY open.'",
+  },
+  {
+    year: "The Build",
+    title: "TradinStar is born",
+    desc: "Built under VYBE STACK by a forex trader who was tired of guessing. Every feature exists because it was needed — fast logging, screenshot capture, AI coaching, risk calculation. Nothing bloated. Nothing generic.",
+  },
+];
+
+const values = [
+  {
+    icon: Zap,
+    title: "Built for speed",
+    desc: "Logging a trade should take under 30 seconds. We obsess over friction so you don't lose momentum mid-session.",
+    color: "bg-amber-50 text-amber-600",
+  },
+  {
+    icon: Shield,
+    title: "Privacy first",
+    desc: "Your trade data is yours. We never sell, share, or analyze it for anything other than coaching you.",
+    color: "bg-emerald-50 text-emerald-600",
+  },
+  {
+    icon: Users,
+    title: "Trader-built",
+    desc: "Every decision is made by someone who trades. No feature gets added unless it solves a real problem.",
+    color: "bg-violet-50 text-violet-600",
+  },
+];
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 text-center">
-        <div className="max-w-4xl mx-auto">
-          <Badge variant="secondary" className="mb-4">
-            About TradinStar
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Empowering Traders with AI-Driven Insights
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            We're on a mission to help traders achieve consistent profitability through intelligent analysis, personalized coaching, and comprehensive performance tracking.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="text-lg px-8">
-              <Link to="/auth">Start Your Journey</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="text-lg px-8">
-              <Link to="/">Back to Home</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+    <div className="min-h-screen bg-white">
 
-      {/* Mission Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Trading should be about skill and strategy, not guesswork. We believe every trader deserves access to professional-grade tools and AI-powered insights to make better decisions and achieve their financial goals.
-          </p>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <Target className="w-10 h-10 text-primary mb-2" />
-              <CardTitle>Consistent Profits</CardTitle>
-              <CardDescription>
-                Help traders develop sustainable strategies that lead to long-term success, not short-term wins.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <Brain className="w-10 h-10 text-primary mb-2" />
-              <CardTitle>AI-Powered Learning</CardTitle>
-              <CardDescription>
-                Leverage artificial intelligence to analyze trading patterns and provide personalized coaching.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <Users className="w-10 h-10 text-primary mb-2" />
-              <CardTitle>Community of Traders</CardTitle>
-              <CardDescription>
-                Build a supportive community where traders can learn from each other and share insights.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
-      </section>
-
-      {/* How AI Coach Works */}
-      <section className="container mx-auto px-4 py-16 bg-muted/30">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">How Our AI Coach Works</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Our AI analyzes your trading data to provide personalized insights and recommendations tailored to your unique style and goals.
-          </p>
-        </div>
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Data Analysis</CardTitle>
-                <CardDescription>
-                  The AI examines your trade history, win/loss ratios, risk management, and emotional patterns to identify strengths and areas for improvement.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Personalized Insights</CardTitle>
-                <CardDescription>
-                  Based on your data, the AI generates specific recommendations for entry/exit strategies, position sizing, and risk management.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Continuous Learning</CardTitle>
-                <CardDescription>
-                  As you log more trades, the AI refines its understanding of your style and provides increasingly accurate coaching.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Tracking</CardTitle>
-                <CardDescription>
-                  Monitor how your trading improves over time with detailed analytics and progress reports.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* What Makes Us Different */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">What Makes Us Different</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Unlike basic spreadsheets or generic trading apps, TradinStar combines comprehensive tools with AI intelligence for a complete trading solution.
-          </p>
-        </div>
-        <div className="grid md:grid-cols-2 gap-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>AI-Powered Coaching</CardTitle>
-              <CardDescription>
-                Most trading journals are passive record-keepers. Our AI actively analyzes your data and provides actionable recommendations.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Comprehensive Tools</CardTitle>
-              <CardDescription>
-                From risk calculators to performance analytics, we provide everything serious traders need in one integrated platform.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Privacy-First Design</CardTitle>
-              <CardDescription>
-                Your trading data stays private and secure. We never share or sell your information to third parties.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Trader-Focused Features</CardTitle>
-              <CardDescription>
-                Built by traders for traders, with features that address real challenges like emotional discipline and risk management.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
-      </section>
-
-      {/* Team Section */}
-      <section className="container mx-auto px-4 py-16 bg-muted/30">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Our Team</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            TradinStar was founded by experienced traders and developers who understand the challenges of consistent profitability in financial markets.
-          </p>
-        </div>
-        <div className="max-w-2xl mx-auto text-center">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground">
-                We're a team of passionate traders and technologists committed to democratizing access to professional-grade trading tools. 
-                Our combined experience spans decades of market analysis, risk management, and software development.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Privacy & Security */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Privacy & Security</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Your trading data is our top priority. We implement industry-standard security measures to keep your information safe.
-          </p>
-        </div>
-        <div className="grid md:grid-cols-2 gap-8">
-          <Card>
-            <CardHeader>
-              <Lock className="w-10 h-10 text-primary mb-2" />
-              <CardTitle>Data Encryption</CardTitle>
-              <CardDescription>
-                All data is encrypted in transit and at rest using industry-standard protocols. Your trading history and personal information are fully protected.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <Shield className="w-10 h-10 text-primary mb-2" />
-              <CardTitle>Secure Infrastructure</CardTitle>
-              <CardDescription>
-                We use Supabase's enterprise-grade infrastructure with automatic backups, monitoring, and compliance with data protection regulations.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section className="container mx-auto px-4 py-16 bg-muted/30">
-        <div className="text-center max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Get In Touch</h2>
-          <p className="text-muted-foreground mb-8">
-            Have questions about TradinStar? We'd love to hear from you and help you on your trading journey.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild variant="outline" size="lg">
-              <a href="mailto:support@tradinstar.com">
-                <Mail className="w-4 h-4 mr-2" />
-                Contact Support
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link to="/">Back to Home</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t bg-card">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <h3 className="font-semibold">TradinStar</h3>
-              <p className="text-sm text-muted-foreground">AI-Powered Trading Journal</p>
+      {/* NAV */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "hsl(222,60%,20%)" }}>
+              <TrendingUp className="w-4 h-4 text-white" />
             </div>
-            <div className="flex gap-6">
-              <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
-                Home
-              </Link>
-              <a href="mailto:support@tradinstar.com" className="text-sm text-muted-foreground hover:text-foreground">
-                Contact
-              </a>
+            <span className="font-bold text-slate-900 text-lg tracking-tight">TradinStar</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Link to="/auth" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+              Sign in
+            </Link>
+            <Link
+              to="/auth"
+              className="text-sm font-semibold text-white px-4 py-2 rounded-xl transition-all hover:opacity-90"
+              style={{ background: "hsl(222,60%,20%)" }}
+            >
+              Get Started Free
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
+        <div className="inline-flex items-center gap-2 bg-slate-100 text-slate-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
+          Our story
+        </div>
+        <h1 className="text-5xl md:text-6xl font-bold text-slate-900 leading-tight tracking-tight mb-6">
+          Built by a trader,{" "}
+          <span className="relative inline-block">
+            <span className="relative z-10" style={{ color: "hsl(222,60%,35%)" }}>for traders</span>
+            <span className="absolute bottom-1 left-0 right-0 h-3 bg-amber-100 -z-0 rounded" />
+          </span>
+        </h1>
+        <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+          TradinStar wasn't designed in a boardroom. It was built out of frustration — by someone sitting in losing trades, staring at a spreadsheet, wondering what they were missing.
+        </p>
+      </section>
+
+      {/* TIMELINE */}
+      <section className="max-w-3xl mx-auto px-6 pb-20">
+        <div className="relative">
+          <div className="absolute left-5 top-2 bottom-2 w-px bg-slate-100 hidden md:block" />
+          <div className="space-y-10">
+            {timeline.map(({ year, title, desc }, i) => (
+              <div key={i} className="flex gap-8 items-start">
+                <div className="hidden md:flex flex-col items-center flex-shrink-0">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold z-10"
+                    style={{ background: "hsl(222,60%,20%)" }}
+                  >
+                    {i + 1}
+                  </div>
+                </div>
+                <div className="flex-1 bg-white border border-slate-100 rounded-2xl p-6 hover:border-slate-200 hover:shadow-sm transition-all">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1">{year}</p>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">{title}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* VALUES */}
+      <section className="bg-slate-50 border-y border-slate-100">
+        <div className="max-w-6xl mx-auto px-6 py-20">
+          <div className="text-center mb-14">
+            <p className="text-sm font-semibold text-blue-600 mb-3 uppercase tracking-wider">What we stand for</p>
+            <h2 className="text-4xl font-bold text-slate-900">How we build</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {values.map(({ icon: Icon, title, desc, color }) => (
+              <div key={title} className="bg-white border border-slate-100 rounded-2xl p-6 hover:border-slate-200 hover:shadow-sm transition-all">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${color}`}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <h3 className="font-semibold text-slate-900 mb-2">{title}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* VYBE STACK CALLOUT */}
+      <section className="max-w-4xl mx-auto px-6 py-20">
+        <div className="bg-slate-900 rounded-2xl p-10 text-center">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Part of</p>
+          <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">VYBE STACK</h2>
+          <p className="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed mb-6">
+            TradinStar is a product of VYBE STACK — a software and creative company building focused tools for real people. Every product is minimal, purposeful, and built to last.
+          </p>
+          <a
+            href="https://github.com/NBG-TOPGEE"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors"
+          >
+            github.com/NBG-TOPGEE <ArrowRight className="w-3.5 h-3.5" />
+          </a>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-slate-50 border-t border-slate-100">
+        <div className="max-w-3xl mx-auto px-6 py-20 text-center">
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">Ready to understand your trading?</h2>
+          <p className="text-slate-500 mb-8">
+            Join traders using TradinStar to fix their habits and build real consistency.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/auth"
+              className="inline-flex items-center justify-center gap-2 text-white font-semibold px-6 py-3.5 rounded-xl transition-all hover:opacity-90 text-sm"
+              style={{ background: "hsl(222,60%,20%)", boxShadow: "0 4px 20px hsl(222,60%,20%,0.25)" }}
+            >
+              Start for free <ArrowRight className="w-4 h-4" />
+            </Link>
+            <a
+              href="mailto:support@tradinstar.com"
+              className="inline-flex items-center justify-center gap-2 text-slate-700 font-semibold px-6 py-3.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white transition-all text-sm"
+            >
+              <Mail className="w-4 h-4" /> Contact us
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-slate-100 bg-white">
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "hsl(222,60%,20%)" }}>
+                <TrendingUp className="w-3.5 h-3.5 text-white" />
+              </div>
+              <span className="font-semibold text-slate-800">TradinStar</span>
+              <span className="text-slate-300 text-sm">·</span>
+              <span className="text-sm text-slate-400">AI-Powered Trading Journal</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link to="/" className="text-sm text-slate-400 hover:text-slate-700 transition-colors">Home</Link>
+              <a href="mailto:support@tradinstar.com" className="text-sm text-slate-400 hover:text-slate-700 transition-colors">Support</a>
+              <span className="text-slate-200">·</span>
+              <span className="text-xs text-slate-400">
+                Built by{" "}
+                <span className="font-semibold text-slate-600 uppercase tracking-widest text-[11px]">VYBE STACK</span>
+              </span>
             </div>
           </div>
         </div>

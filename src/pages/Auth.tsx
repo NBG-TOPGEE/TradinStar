@@ -97,7 +97,8 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md bg-card border-border">
+      <div className="flex flex-col items-center w-full max-w-md">
+      <Card className="w-full bg-card border-border">
         <CardHeader className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
             {/* logo image: put your file in public/ and update the src below */}
@@ -156,6 +157,15 @@ export default function Auth() {
           </div>
         </CardContent>
       </Card>
+
+      {/* VYBE STACK credit */}
+      <p className="mt-5 text-center text-xs text-muted-foreground/50 tracking-wide">
+        Built by{" "}
+        <span className="font-semibold text-muted-foreground/70 uppercase tracking-widest">
+          VYBE STACK
+        </span>
+      </p>
+      </div>
     </div>
   );
 }
