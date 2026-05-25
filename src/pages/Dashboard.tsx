@@ -56,7 +56,7 @@ export default function Dashboard() {
           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "hsl(222,60%,20%)" }}>
             <Zap className="w-3.5 h-3.5 text-white" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: "hsl(222,25%,10%)" }}>TradinStar</h1>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: "hsl(222,25%,10%)" }}>Welcome back</h1>
         </div>
         <p className="text-sm text-slate-500 ml-9">Your trading dashboard</p>
       </motion.div>
@@ -79,24 +79,6 @@ export default function Dashboard() {
             <p className={`text-xl font-bold font-mono ${s.color}`}>{s.value}</p>
           </motion.div>
         ))}
-      </div>
-
-      {/* Action buttons */}
-      <div className="flex gap-3 mb-8">
-        <Link
-          to="/log"
-          className="flex-1 text-white rounded-2xl py-3.5 text-center font-semibold text-sm transition-all active:scale-95"
-          style={{ background: "hsl(222,60%,20%)", boxShadow: "0 4px 14px hsl(222,60%,20%,0.3)" }}
-        >
-          + Log Trade
-        </Link>
-        <Link
-          to="/risk"
-          className="flex-1 bg-white rounded-2xl py-3.5 text-center font-semibold text-sm text-slate-700 border border-slate-200 transition-all active:scale-95"
-          style={{ boxShadow: "0 1px 4px hsl(220,14%,10%,0.06)" }}
-        >
-          Risk Calc
-        </Link>
       </div>
 
       {/* Recent trades */}

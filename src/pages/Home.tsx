@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { TrendingUp, Brain, Calculator, BarChart3, BookOpen, Shield, ArrowRight, CheckCircle2, ChevronRight, Star } from "lucide-react";
+import navbarLogo from "@/assets/images/navbar-logo.png";
 
 const features = [
   { icon: BookOpen, title: "Smart Trade Logging", desc: "Log every trade with entry/exit prices, session, strategy, emotions, and chart screenshots — all in under 30 seconds.", color: "bg-blue-50 text-blue-600" },
@@ -23,12 +24,15 @@ export default function Home() {
       {/* NAV */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "hsl(222,60%,20%)" }}>
-              <TrendingUp className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-slate-900 text-lg tracking-tight">TradinStar</span>
-          </div>
+          <Link to="/" className="flex items-center min-w-fit shrink-0 py-1 pr-2">
+            <span className="nav-brand-logo-frame">
+              <img
+                src={navbarLogo}
+                alt="TradinStar logo"
+                className="nav-brand-logo object-contain"
+              />
+            </span>
+          </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">Features</a>
             <a href="#testimonials" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">Reviews</a>
@@ -386,11 +390,13 @@ export default function Home() {
       <footer className="border-t border-slate-100 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "hsl(222,60%,20%)" }}>
-                <TrendingUp className="w-3.5 h-3.5 text-white" />
-              </div>
-              <span className="font-semibold text-slate-800">TradinStar</span>
+            <div className="flex items-center gap-3">
+              <img
+                src={navbarLogo}
+                alt="TradinStar logo"
+                className="nav-brand-logo h-8 w-auto object-contain"
+                style={{ maxWidth: 160 }}
+              />
               <span className="text-slate-300 text-sm">·</span>
               <span className="text-sm text-slate-400">AI-Powered Trading Journal</span>
             </div>

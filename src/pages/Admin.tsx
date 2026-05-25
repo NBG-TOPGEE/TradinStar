@@ -797,7 +797,10 @@ function KeyGate({ onUnlock }: { onUnlock: (key: string) => void }) {
   return (
     <div className="gate-wrap">
       <div className="gate-card">
-        <div className="gate-logo">TradinStar Admin</div>
+        <div className="gate-logo" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+          <img src="/navbar-logo.png" alt="TradinStar logo" style={{ height: 42, width: "auto", objectFit: "contain", maxWidth: 210, filter: "saturate(1.18) contrast(1.12) drop-shadow(0 1px 2px rgba(15,23,42,0.18))" }} />
+          <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", opacity: 0.55 }}>ADMIN</span>
+        </div>
         <div className="gate-sub">Service Role Authentication Required</div>
         <div className="gate-label">Supabase Service Role Key</div>
         <input
@@ -907,7 +910,7 @@ export default function Admin() {
     <div className="app">
       <aside className="sidebar">
         <div className="logo-area">
-          <div className="logo-pip">TradinStar</div>
+          <img src="/navbar-logo.png" alt="TradinStar logo" style={{ height: 38, width: "auto", objectFit: "contain", maxWidth: 190, display: "block", marginBottom: 12, filter: "saturate(1.18) contrast(1.12) drop-shadow(0 1px 2px rgba(15,23,42,0.18))" }} />
           <div className="logo-title">Admin Panel</div>
           <div className="logo-tag">Developer Console</div>
         </div>

@@ -1,5 +1,6 @@
-import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, BookOpen, BarChart3, MessageCircle, Cog, Plus, TrendingUp } from "lucide-react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { LayoutDashboard, BookOpen, BarChart3, MessageCircle, Cog, Plus } from "lucide-react";
+import navbarLogo from "@/assets/images/navbar-logo.png";
 
 const tabs = [
   { to: "/dashboard",   icon: LayoutDashboard, label: "Home"    },
@@ -23,13 +24,15 @@ export default function AppLayout() {
         style={{ boxShadow: "0 1px 8px hsl(222,40%,14%,0.05)" }}>
         <div className="flex items-center justify-between max-w-lg mx-auto px-4 h-14">
           {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: "hsl(222,60%,20%)" }}>
-              <TrendingUp className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-slate-800 tracking-tight">TradinStar</span>
-          </div>
+          <Link to="/dashboard" className="flex items-center min-w-fit shrink-0 py-1 pr-2">
+            <span className="nav-brand-logo-frame">
+              <img
+                src={navbarLogo}
+                alt="TradinStar logo"
+                className="nav-brand-logo object-contain"
+              />
+            </span>
+          </Link>
 
           {/* Right actions */}
           <div className="flex items-center gap-1">

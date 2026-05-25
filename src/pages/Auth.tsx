@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { TrendingUp, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import navbarLogo from "@/assets/images/navbar-logo.png";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -100,10 +101,13 @@ export default function Auth() {
       <div className="flex flex-col items-center w-full max-w-md">
       <Card className="w-full bg-card border-border">
         <CardHeader className="text-center space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            {/* logo image: put your file in public/ and update the src below */}
-            <img src="/trading-magnifier.png" alt="logo" className="w-10 h-10 rounded-xl" />
-            <CardTitle className="text-2xl font-bold text-foreground tracking-tight">TradinStar</CardTitle>
+          <div className="flex flex-col items-center gap-3">
+            <img
+              src={navbarLogo}
+              alt="TradinStar logo"
+              className="nav-brand-logo h-12 w-auto object-contain"
+              style={{ maxWidth: 220 }}
+            />
           </div>
           <CardDescription className="text-muted-foreground">
             {isLogin ? "Welcome back, trader" : "Create your trading journal"}
