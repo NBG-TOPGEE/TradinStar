@@ -1,10 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import navbarLogo from "@/assets/images/navbar-logo.png";
@@ -36,8 +32,7 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
+      email, password,
       options: {
         data: { display_name: displayName },
         emailRedirectTo: `${window.location.origin}/dashboard`,
@@ -66,109 +61,196 @@ export default function Auth() {
     }
   };
 
+  const CARD_STYLE = {
+    background: "linear-gradient(160deg, hsl(222,24%,10%) 0%, hsl(222,22%,9%) 100%)",
+    border: "1px solid hsl(222,18%,16%)",
+    borderRadius: "1.5rem",
+    boxShadow: "0 24px 80px hsl(222,40%,4%,0.8), 0 0 0 1px hsl(215,30%,30%,0.06), inset 0 1px 0 hsl(215,30%,30%,0.1)",
+  };
+
+  const INPUT_STYLE = {
+    background: "hsl(222,22%,11%)",
+    border: "1px solid hsl(222,18%,18%)",
+    borderRadius: "0.875rem",
+    color: "hsl(210,30%,88%)",
+    fontSize: "0.875rem",
+    padding: "0.75rem 1rem 0.75rem 2.75rem",
+    outline: "none",
+    width: "100%",
+    transition: "border-color 0.2s, box-shadow 0.2s",
+  };
+
   if (isForgot) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md bg-card border-border">
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl text-foreground">Reset Password</CardTitle>
-            <CardDescription className="text-muted-foreground">Enter your email to receive a reset link</CardDescription>
-          </CardHeader>
-          <CardContent>
+      <div className="min-h-screen flex items-center justify-center px-4 ambient-bg">
+        <div className="w-full max-w-sm" style={CARD_STYLE}>
+          <div className="p-8">
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-bold mb-1" style={{ color: "hsl(210,30%,92%)" }}>Reset Password</h2>
+              <p className="text-sm" style={{ color: "hsl(215,15%,40%)" }}>Enter your email to receive a reset link</p>
+            </div>
             <form onSubmit={handleForgotPassword} className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-foreground">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input className="pl-10" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-                </div>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4" style={{ color: "hsl(215,15%,38%)" }} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                  style={INPUT_STYLE}
+                  onFocus={e => {
+                    e.currentTarget.style.borderColor = "hsl(217,92%,60%,0.6)";
+                    e.currentTarget.style.boxShadow = "0 0 0 3px hsl(217,92%,60%,0.08)";
+                  }}
+                  onBlur={e => {
+                    e.currentTarget.style.borderColor = "hsl(222,18%,18%)";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-60"
+                style={{
+                  background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,40%))",
+                  boxShadow: "0 4px 16px hsl(217,92%,60%,0.35)",
+                }}
+              >
                 {loading ? "Sending..." : "Send Reset Link"}
-              </Button>
-              <Button type="button" variant="ghost" className="w-full text-muted-foreground" onClick={() => setIsForgot(false)}>
-                Back to login
-              </Button>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsForgot(false)}
+                className="w-full text-sm transition-all hover:opacity-80"
+                style={{ color: "hsl(215,15%,40%)" }}
+              >
+                ← Back to login
+              </button>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="flex flex-col items-center w-full max-w-md">
-      <Card className="w-full bg-card border-border">
-        <CardHeader className="text-center space-y-3">
-          <div className="flex flex-col items-center gap-3">
-            <img
-              src={navbarLogo}
-              alt="TradinStar logo"
-              className="nav-brand-logo h-12 w-auto object-contain"
-              style={{ maxWidth: 220 }}
-            />
-          </div>
-          <CardDescription className="text-muted-foreground">
-            {isLogin ? "Welcome back, trader" : "Create your trading journal"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={isLogin ? handleLogin : handleSignup} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label className="text-foreground">Display Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input className="pl-10" value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Your name" required />
-                </div>
+    <div className="min-h-screen flex items-center justify-center px-4 ambient-bg">
+      <div className="flex flex-col items-center w-full max-w-sm">
+        <div className="w-full" style={CARD_STYLE}>
+          <div className="p-8">
+            {/* Logo */}
+            <div className="flex flex-col items-center mb-7">
+              <div className="nav-brand-logo-frame mb-1">
+                <img src={navbarLogo} alt="TradinStar logo" className="nav-brand-logo object-contain" />
               </div>
-            )}
-            <div className="space-y-2">
-              <Label className="text-foreground">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-10" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-              </div>
+              <p className="text-sm mt-2" style={{ color: "hsl(215,15%,40%)" }}>
+                {isLogin ? "Welcome back, trader" : "Create your trading journal"}
+              </p>
             </div>
-            <div className="space-y-2">
-              <Label className="text-foreground">Password</Label>
+
+            <form onSubmit={isLogin ? handleLogin : handleSignup} className="space-y-4">
+              {!isLogin && (
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4" style={{ color: "hsl(215,15%,38%)" }} />
+                  <input
+                    value={displayName}
+                    onChange={e => setDisplayName(e.target.value)}
+                    placeholder="Display name"
+                    required
+                    style={INPUT_STYLE}
+                    onFocus={e => { e.currentTarget.style.borderColor = "hsl(217,92%,60%,0.6)"; e.currentTarget.style.boxShadow = "0 0 0 3px hsl(217,92%,60%,0.08)"; }}
+                    onBlur={e => { e.currentTarget.style.borderColor = "hsl(222,18%,18%)"; e.currentTarget.style.boxShadow = "none"; }}
+                  />
+                </div>
+              )}
+
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-10 pr-10" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors">
+                <Mail className="absolute left-3 top-3 h-4 w-4" style={{ color: "hsl(215,15%,38%)" }} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                  style={INPUT_STYLE}
+                  onFocus={e => { e.currentTarget.style.borderColor = "hsl(217,92%,60%,0.6)"; e.currentTarget.style.boxShadow = "0 0 0 3px hsl(217,92%,60%,0.08)"; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = "hsl(222,18%,18%)"; e.currentTarget.style.boxShadow = "none"; }}
+                />
+              </div>
+
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4" style={{ color: "hsl(215,15%,38%)" }} />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Password"
+                  required
+                  minLength={6}
+                  style={{ ...INPUT_STYLE, paddingRight: "2.75rem" }}
+                  onFocus={e => { e.currentTarget.style.borderColor = "hsl(217,92%,60%,0.6)"; e.currentTarget.style.boxShadow = "0 0 0 3px hsl(217,92%,60%,0.08)"; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = "hsl(222,18%,18%)"; e.currentTarget.style.boxShadow = "none"; }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 transition-all hover:opacity-80"
+                  style={{ color: "hsl(215,15%,38%)" }}
+                >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-            </div>
-            {isLogin && (
-              <Button type="button" variant="link" className="px-0 text-sm text-muted-foreground" onClick={() => setIsForgot(true)}>
-                Forgot password?
-              </Button>
-            )}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
-            </Button>
-          </form>
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-            </button>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* VYBE STACK credit */}
-      <p className="mt-5 text-center text-xs text-muted-foreground/50 tracking-wide">
-        Built by{" "}
-        <span className="font-semibold text-muted-foreground/70 uppercase tracking-widest">
-          VYBE STACK
-        </span>
-      </p>
+              {isLogin && (
+                <button
+                  type="button"
+                  onClick={() => setIsForgot(true)}
+                  className="text-xs transition-all hover:opacity-80"
+                  style={{ color: "hsl(217,92%,60%)" }}
+                >
+                  Forgot password?
+                </button>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+                style={{
+                  background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,40%))",
+                  boxShadow: "0 4px 20px hsl(217,92%,60%,0.4)",
+                }}
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Please wait...
+                  </>
+                ) : isLogin ? "Sign In" : "Create Account"}
+              </button>
+            </form>
+
+            <div className="mt-5 text-center">
+              <button
+                type="button"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-sm transition-all hover:opacity-80"
+                style={{ color: "hsl(215,15%,40%)" }}
+              >
+                {isLogin ? "Don't have an account? " : "Already have an account? "}
+                <span style={{ color: "hsl(217,92%,65%)" }}>
+                  {isLogin ? "Sign up" : "Sign in"}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-5 text-center text-xs tracking-widest" style={{ color: "hsl(215,15%,25%)" }}>
+          BUILT BY <span className="font-bold" style={{ color: "hsl(215,15%,30%)" }}>VYBE STACK</span>
+        </p>
       </div>
     </div>
   );

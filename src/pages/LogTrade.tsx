@@ -13,6 +13,22 @@ const STRATEGIES: TradingStrategy[] = ["Breakout", "Trend", "Scalp", "Reversal",
 const EMOTIONS: TradeEmotion[] = ["Fearful", "Neutral", "Confident", "Greedy"];
 const EMOTION_EMOJI: Record<TradeEmotion, string> = { Fearful: "😰", Neutral: "😐", Confident: "💪", Greedy: "🤑" };
 
+const LABEL_STYLE = {
+  fontSize: "0.65rem",
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase" as const,
+  color: "hsl(215,15%,35%)",
+  marginBottom: "0.5rem",
+  display: "block",
+};
+
+const INACTIVE_BTN = {
+  background: "hsl(222,22%,12%)",
+  border: "1px solid hsl(222,18%,17%)",
+  color: "hsl(215,15%,45%)",
+};
+
 export default function LogTrade() {
   const { addTrade } = useTrades();
   const { user } = useAuth();
@@ -113,31 +129,47 @@ export default function LogTrade() {
     navigate("/dashboard");
   };
 
-  const inputClass = "w-full bg-white border border-slate-200 rounded-xl px-3.5 py-3 text-sm font-mono text-slate-800 placeholder:text-slate-300 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-all";
-  const selectClass = "w-full bg-white border border-slate-200 rounded-xl px-3.5 py-3 text-sm text-slate-800 outline-none focus:border-blue-400 transition-all";
-
   return (
     <div className="max-w-lg mx-auto px-4 pt-6">
+      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+          style={{ background: "hsl(222,22%,13%)", border: "1px solid hsl(222,18%,18%)", color: "hsl(215,15%,50%)" }}
+        >
           <ChevronLeft className="w-4 h-4" />
         </button>
-        <h1 className="text-xl font-bold text-slate-800">Log Trade</h1>
+        <h1 className="text-xl font-bold" style={{ color: "hsl(210,30%,92%)" }}>Log Trade</h1>
       </div>
 
+      {/* Live P&L preview */}
       {(entryPrice && exitPrice && positionSize) && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className={`rounded-2xl p-4 mb-6 border ${calc.pnl >= 0 ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"}`}>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl p-4 mb-6"
+          style={{
+            background: calc.pnl >= 0 ? "hsl(158,68%,46%,0.08)" : "hsl(0,72%,58%,0.08)",
+            border: `1px solid ${calc.pnl >= 0 ? "hsl(158,68%,46%,0.2)" : "hsl(0,72%,58%,0.2)"}`,
+          }}
+        >
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-xs text-slate-500 font-medium">Estimated P&L</p>
-              <p className={`text-2xl font-bold font-mono ${calc.pnl >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+              <p className="text-xs font-medium mb-0.5" style={{ color: "hsl(215,15%,40%)" }}>Estimated P&L</p>
+              <p
+                className="text-2xl font-bold font-mono"
+                style={{ color: calc.pnl >= 0 ? "hsl(158,68%,55%)" : "hsl(0,72%,65%)" }}
+              >
                 {calc.pnl >= 0 ? "+" : ""}${calc.pnl.toFixed(2)}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-slate-500 font-medium">Pips</p>
-              <p className={`text-lg font-bold font-mono ${calc.pips >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+              <p className="text-xs font-medium mb-0.5" style={{ color: "hsl(215,15%,40%)" }}>Pips</p>
+              <p
+                className="text-lg font-bold font-mono"
+                style={{ color: calc.pips >= 0 ? "hsl(158,68%,55%)" : "hsl(0,72%,65%)" }}
+              >
                 {calc.pips > 0 ? "+" : ""}{calc.pips}
               </p>
             </div>
@@ -146,87 +178,145 @@ export default function LogTrade() {
       )}
 
       <div className="space-y-5">
+        {/* Market type */}
         <div>
-          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Market Type</label>
+          <label style={LABEL_STYLE}>Market Type</label>
           <div className="grid grid-cols-4 gap-2 mb-3">
             {(["Forex", "Crypto", "Indices", "Commodities"] as MarketType[]).map(m => (
-              <button key={m} onClick={() => { setMarketType(m); setPair(MARKET_PAIRS[m][0]); }}
-                className={`py-2 rounded-xl text-xs font-semibold transition-all ${marketType === m ? "text-white" : "bg-white border border-slate-200 text-slate-500"}`}
-                style={marketType === m ? { background: "hsl(217,90%,56%)" } : {}}>
+              <button
+                key={m}
+                onClick={() => { setMarketType(m); setPair(MARKET_PAIRS[m][0]); }}
+                className="py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
+                style={marketType === m ? {
+                  background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,42%))",
+                  color: "white",
+                  boxShadow: "0 4px 12px hsl(217,92%,60%,0.35)",
+                  border: "1px solid transparent",
+                } : INACTIVE_BTN}
+              >
                 {m === "Forex" ? "🌍" : m === "Crypto" ? "₿" : m === "Indices" ? "📈" : "🏅"} {m}
               </button>
             ))}
           </div>
-          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Trading Pair</label>
-          <select value={pair} onChange={e => setPair(e.target.value)} className={selectClass}>
-            {MARKET_PAIRS[marketType].map(p => <option key={p}>{p}</option>)}
+
+          <label style={LABEL_STYLE}>Trading Pair</label>
+          <select
+            value={pair}
+            onChange={e => setPair(e.target.value)}
+            className="w-full rounded-xl px-3.5 py-3 text-sm premium-input"
+          >
+            {MARKET_PAIRS[marketType].map(p => <option key={p} style={{ background: "hsl(222,22%,10%)" }}>{p}</option>)}
           </select>
         </div>
 
+        {/* Direction */}
         <div>
-          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Direction</label>
+          <label style={LABEL_STYLE}>Direction</label>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setDirection("long")}
-              className={`flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all ${direction === "long" ? "text-white" : "bg-white border border-slate-200 text-slate-500"}`}
-              style={direction === "long" ? { background: "hsl(152,65%,38%)", boxShadow: "0 2px 8px hsl(152,65%,38%,0.3)" } : {}}>
+            <button
+              onClick={() => setDirection("long")}
+              className="flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all active:scale-95"
+              style={direction === "long" ? {
+                background: "linear-gradient(135deg, hsl(158,68%,46%), hsl(158,68%,36%))",
+                color: "white",
+                boxShadow: "0 4px 16px hsl(158,68%,46%,0.4)",
+                border: "1px solid hsl(158,68%,46%,0.3)",
+              } : { ...INACTIVE_BTN }}
+            >
               <ArrowUp className="w-4 h-4" /> Long
             </button>
-            <button onClick={() => setDirection("short")}
-              className={`flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all ${direction === "short" ? "text-white" : "bg-white border border-slate-200 text-slate-500"}`}
-              style={direction === "short" ? { background: "hsl(0,72%,51%)", boxShadow: "0 2px 8px hsl(0,72%,51%,0.3)" } : {}}>
+            <button
+              onClick={() => setDirection("short")}
+              className="flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all active:scale-95"
+              style={direction === "short" ? {
+                background: "linear-gradient(135deg, hsl(0,72%,58%), hsl(0,72%,44%))",
+                color: "white",
+                boxShadow: "0 4px 16px hsl(0,72%,58%,0.4)",
+                border: "1px solid hsl(0,72%,58%,0.3)",
+              } : { ...INACTIVE_BTN }}
+            >
               <ArrowDown className="w-4 h-4" /> Short
             </button>
           </div>
         </div>
 
+        {/* Prices */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Entry Price</label>
-            <input type="number" step="any" value={entryPrice} onChange={e => setEntryPrice(e.target.value)} placeholder="0.00" className={inputClass} />
+            <label style={LABEL_STYLE}>Entry Price</label>
+            <input type="number" step="any" value={entryPrice} onChange={e => setEntryPrice(e.target.value)} placeholder="0.00" className="w-full rounded-xl px-3.5 py-3 text-sm font-mono premium-input" />
           </div>
           <div>
-            <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Exit Price</label>
-            <input type="number" step="any" value={exitPrice} onChange={e => setExitPrice(e.target.value)} placeholder="0.00" className={inputClass} />
+            <label style={LABEL_STYLE}>Exit Price</label>
+            <input type="number" step="any" value={exitPrice} onChange={e => setExitPrice(e.target.value)} placeholder="0.00" className="w-full rounded-xl px-3.5 py-3 text-sm font-mono premium-input" />
           </div>
         </div>
 
         <div>
-          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Position Size (Lots)</label>
-          <input type="number" step="any" value={positionSize} onChange={e => setPositionSize(e.target.value)} placeholder="1.0" className={inputClass} />
+          <label style={LABEL_STYLE}>Position Size (Lots)</label>
+          <input type="number" step="any" value={positionSize} onChange={e => setPositionSize(e.target.value)} placeholder="1.0" className="w-full rounded-xl px-3.5 py-3 text-sm font-mono premium-input" />
         </div>
 
+        {/* Session */}
         <div>
-          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Session</label>
+          <label style={LABEL_STYLE}>Session</label>
           <div className="grid grid-cols-4 gap-2">
             {SESSIONS.map(s => (
-              <button key={s} onClick={() => setSession(s)}
-                className={`py-2.5 rounded-xl text-xs font-semibold transition-all ${session === s ? "text-white" : "bg-white border border-slate-200 text-slate-500"}`}
-                style={session === s ? { background: "hsl(222,60%,20%)" } : {}}>
+              <button
+                key={s}
+                onClick={() => setSession(s)}
+                className="py-2.5 rounded-xl text-xs font-semibold transition-all active:scale-95"
+                style={session === s ? {
+                  background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,42%))",
+                  color: "white",
+                  boxShadow: "0 4px 12px hsl(217,92%,60%,0.35)",
+                  border: "1px solid transparent",
+                } : INACTIVE_BTN}
+              >
                 {s}
               </button>
             ))}
           </div>
         </div>
 
+        {/* Strategy */}
         <div>
-          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Strategy</label>
+          <label style={LABEL_STYLE}>Strategy</label>
           <div className="grid grid-cols-3 gap-2">
             {STRATEGIES.map(s => (
-              <button key={s} onClick={() => setStrategy(s)}
-                className={`py-2.5 rounded-xl text-xs font-semibold transition-all ${strategy === s ? "text-white" : "bg-white border border-slate-200 text-slate-500"}`}
-                style={strategy === s ? { background: "hsl(217,90%,56%)" } : {}}>
+              <button
+                key={s}
+                onClick={() => setStrategy(s)}
+                className="py-2.5 rounded-xl text-xs font-semibold transition-all active:scale-95"
+                style={strategy === s ? {
+                  background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,42%))",
+                  color: "white",
+                  boxShadow: "0 4px 12px hsl(217,92%,60%,0.35)",
+                  border: "1px solid transparent",
+                } : INACTIVE_BTN}
+              >
                 {s}
               </button>
             ))}
           </div>
         </div>
 
+        {/* Emotion */}
         <div>
-          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Emotional State</label>
+          <label style={LABEL_STYLE}>Emotional State</label>
           <div className="grid grid-cols-4 gap-2">
             {EMOTIONS.map(e => (
-              <button key={e} onClick={() => setEmotion(e)}
-                className={`py-2.5 rounded-xl text-xs font-semibold transition-all flex flex-col items-center gap-1 ${emotion === e ? "bg-slate-800 text-white" : "bg-white border border-slate-200 text-slate-500"}`}>
+              <button
+                key={e}
+                onClick={() => setEmotion(e)}
+                className="py-2.5 rounded-xl text-xs font-semibold transition-all flex flex-col items-center gap-1 active:scale-95"
+                style={emotion === e ? {
+                  background: "hsl(222,22%,18%)",
+                  color: "hsl(210,30%,92%)",
+                  border: "1px solid hsl(217,92%,60%,0.4)",
+                  boxShadow: "0 0 12px hsl(217,92%,60%,0.15)",
+                } : INACTIVE_BTN}
+              >
                 <span>{EMOTION_EMOJI[e]}</span>
                 <span>{e}</span>
               </button>
@@ -234,12 +324,19 @@ export default function LogTrade() {
           </div>
         </div>
 
+        {/* Confidence */}
         <div>
-          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Confidence</label>
+          <label style={LABEL_STYLE}>Confidence</label>
           <div className="flex gap-1">
-            {[1,2,3,4,5].map(n => (
-              <button key={n} onClick={() => setConfidence(n)}>
-                <Star className={`w-7 h-7 transition-all ${n <= confidence ? "fill-amber-400 text-amber-400" : "text-slate-200"}`} />
+            {[1, 2, 3, 4, 5].map(n => (
+              <button key={n} onClick={() => setConfidence(n)} className="transition-transform hover:scale-110 active:scale-95">
+                <Star
+                  className="w-7 h-7 transition-all"
+                  style={{
+                    fill: n <= confidence ? "hsl(38,92%,56%)" : "transparent",
+                    color: n <= confidence ? "hsl(38,92%,56%)" : "hsl(222,18%,22%)",
+                  }}
+                />
               </button>
             ))}
           </div>
@@ -247,20 +344,22 @@ export default function LogTrade() {
 
         {/* Chart Screenshot */}
         <div>
-          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">
-            Chart Screenshot <span className="text-slate-300 font-normal normal-case">(optional)</span>
+          <label style={LABEL_STYLE}>
+            Chart Screenshot <span style={{ color: "hsl(215,15%,30%)", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(optional)</span>
           </label>
 
           {screenshotPreview ? (
-            <div className="relative rounded-xl overflow-hidden border border-slate-200">
+            <div className="relative rounded-xl overflow-hidden" style={{ border: "1px solid hsl(222,18%,18%)" }}>
               <img src={screenshotPreview} alt="Chart preview" className="w-full h-40 object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to top, hsl(222,22%,10%,0.5), transparent)" }} />
               <button
                 onClick={() => { setScreenshotPreview(null); setScreenshotFile(null); }}
-                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-all">
+                className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all"
+                style={{ background: "hsl(222,28%,8%,0.8)", color: "hsl(210,20%,65%)", border: "1px solid hsl(222,18%,20%)" }}
+              >
                 <X className="w-3.5 h-3.5" />
               </button>
-              <div className="absolute bottom-2 left-3 text-white text-xs font-medium opacity-80">
+              <div className="absolute bottom-2 left-3 text-xs font-medium" style={{ color: "hsl(158,68%,55%)" }}>
                 ✓ Chart ready
               </div>
             </div>
@@ -269,24 +368,36 @@ export default function LogTrade() {
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-5 transition-all ${isDragging ? "border-blue-400 bg-blue-50" : "border-slate-200 bg-slate-50/50"}`}>
+              className="border-2 border-dashed rounded-xl p-5 transition-all"
+              style={{
+                borderColor: isDragging ? "hsl(217,92%,60%,0.6)" : "hsl(222,18%,18%)",
+                background: isDragging ? "hsl(217,92%,60%,0.06)" : "hsl(222,22%,10%)",
+              }}
+            >
               <div className="flex flex-col items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center">
-                  <ImageIcon className="w-5 h-5 text-slate-400" />
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: "hsl(222,20%,14%)", border: "1px solid hsl(222,18%,19%)" }}
+                >
+                  <ImageIcon className="w-5 h-5" style={{ color: "hsl(215,15%,38%)" }} />
                 </div>
                 <div className="text-center">
-                  <p className="text-xs font-medium text-slate-600">Drop your chart here</p>
-                  <p className="text-xs text-slate-400 mt-0.5">PNG, JPG up to 10MB</p>
+                  <p className="text-xs font-medium" style={{ color: "hsl(210,20%,60%)" }}>Drop your chart here</p>
+                  <p className="text-xs mt-0.5" style={{ color: "hsl(215,15%,35%)" }}>PNG, JPG up to 10MB</p>
                 </div>
                 <div className="flex gap-2 w-full">
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-all">
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
+                    style={{ background: "hsl(222,20%,14%)", border: "1px solid hsl(222,18%,19%)", color: "hsl(215,15%,45%)" }}
+                  >
                     <Upload className="w-3.5 h-3.5" /> Upload
                   </button>
                   <button
                     onClick={handlePaste}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-all">
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
+                    style={{ background: "hsl(222,20%,14%)", border: "1px solid hsl(222,18%,19%)", color: "hsl(215,15%,45%)" }}
+                  >
                     <Clipboard className="w-3.5 h-3.5" /> Paste
                   </button>
                 </div>
@@ -296,14 +407,29 @@ export default function LogTrade() {
           )}
         </div>
 
+        {/* Notes */}
         <div>
-          <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Notes</label>
-          <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} placeholder="Observations, lessons, mistakes..." className={`${inputClass} resize-none font-sans`} />
+          <label style={LABEL_STYLE}>Notes</label>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            rows={3}
+            placeholder="Observations, lessons, mistakes..."
+            className="w-full rounded-xl px-3.5 py-3 text-sm resize-none premium-input"
+          />
         </div>
 
-        <button onClick={handleSubmit} disabled={uploading}
+        {/* Submit */}
+        <button
+          onClick={handleSubmit}
+          disabled={uploading}
           className="w-full text-white rounded-2xl py-4 font-bold text-sm mt-2 transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
-          style={{ background: "hsl(222,60%,20%)", boxShadow: "0 4px 14px hsl(222,60%,20%,0.3)" }}>
+          style={{
+            background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,40%))",
+            boxShadow: "0 6px 24px hsl(217,92%,60%,0.4)",
+            border: "1px solid hsl(217,92%,70%,0.2)",
+          }}
+        >
           {uploading ? (
             <>
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

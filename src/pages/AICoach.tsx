@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useTrades } from "@/contexts/TradeContext";
 import { getStats } from "@/lib/trades";
-import { Send, Bot, User, Sparkles, ImagePlus, X } from "lucide-react";
+import { Send, Bot, User, Sparkles, ImagePlus, X, Brain, TrendingUp, Clock, Zap } from "lucide-react";
 import { useGemini } from "@/hooks/useGemini";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -16,6 +16,13 @@ const SUGGESTED = [
   "Review my risk management",
   "What's my best session?",
   "Emotion impact on my trades",
+];
+
+const INSIGHT_CARDS = [
+  { icon: TrendingUp, label: "Performance", color: "hsl(217,92%,65%)", bg: "hsl(217,92%,60%,0.1)" },
+  { icon: Brain, label: "Psychology", color: "hsl(280,65%,65%)", bg: "hsl(280,65%,62%,0.1)" },
+  { icon: Clock, label: "Sessions", color: "hsl(38,92%,62%)", bg: "hsl(38,92%,56%,0.1)" },
+  { icon: Zap, label: "Strategy", color: "hsl(158,68%,55%)", bg: "hsl(158,68%,46%,0.1)" },
 ];
 
 export default function AICoach() {
@@ -65,7 +72,7 @@ export default function AICoach() {
       }).filter(Boolean);
       return `🧠 **Emotion Analysis**\n\n${breakdown.join("\n")}\n\nTrade in your highest-performing emotional state.`;
     }
-    return `I can help with:\n• "Analyze my performance"\n• "Session analysis"\n• "Emotion impact"\n• Upload a chart for visual analysis\n\nFor AI-powered coaching, make sure your Gemini API key is set!`;
+    return `I can help with:\n• "Analyze my performance"\n• "Session analysis"\n• "Emotion impact"\n• Upload a chart for visual analysis\n\nFor AI-powered coaching, make sure your API key is set!`;
   };
 
   const handleSend = async (overrideText?: string) => {
@@ -128,20 +135,53 @@ export default function AICoach() {
 
   return (
     <div className="max-w-lg mx-auto flex flex-col h-[calc(100vh-5rem)]">
-      {/* Header */}
+
+      {/* ── HEADER ── */}
       <div className="px-4 pt-6 pb-3">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, hsl(217,90%,56%), hsl(222,60%,40%))" }}>
-            <Sparkles className="w-4 h-4 text-white" />
+        <div className="flex items-center gap-3 mb-4">
+          <div
+            className="w-10 h-10 rounded-2xl flex items-center justify-center ai-active"
+            style={{
+              background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,42%))",
+              boxShadow: "0 4px 16px hsl(217,92%,60%,0.45)",
+            }}
+          >
+            <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-800">AI Coach</h1>
-            <p className="text-[11px] text-slate-400">Powered by Gemini</p>
+            <h1 className="text-lg font-bold" style={{ color: "hsl(210,30%,92%)" }}>
+              AI Coach
+            </h1>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: "hsl(158,68%,50%)" }} />
+              <p className="text-[11px] font-medium" style={{ color: "hsl(215,15%,40%)" }}>
+                Online · Powered by Gemini
+              </p>
+            </div>
           </div>
         </div>
+
+        {/* Quick insight cards */}
+        {messages.length <= 1 && trades.length > 0 && (
+          <div className="grid grid-cols-4 gap-2 mb-1">
+            {INSIGHT_CARDS.map(({ icon: Icon, label, color, bg }) => (
+              <button
+                key={label}
+                onClick={() => handleSend(label.toLowerCase())}
+                className="flex flex-col items-center gap-1.5 py-2.5 rounded-2xl transition-all hover:opacity-80 active:scale-95"
+                style={{ background: bg, border: `1px solid ${color}20` }}
+              >
+                <Icon className="w-4 h-4" style={{ color }} />
+                <span className="text-[9px] font-semibold" style={{ color }}>
+                  {label}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Messages */}
+      {/* ── MESSAGES ── */}
       <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3">
         <AnimatePresence initial={false}>
           {messages.map((msg, i) => (
@@ -152,16 +192,28 @@ export default function AICoach() {
               className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.role === "assistant" && (
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5" style={{ background: "hsl(222,60%,20%)" }}>
+                <div
+                  className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,42%))",
+                    boxShadow: "0 2px 8px hsl(217,92%,60%,0.3)",
+                  }}
+                >
                   <Bot className="w-3.5 h-3.5 text-white" />
                 </div>
               )}
-              <div className={`max-w-[82%] rounded-2xl px-4 py-3 text-sm ${
-                msg.role === "user"
-                  ? "text-white"
-                  : "bg-white text-slate-700 border border-slate-100"
-              }`}
-              style={msg.role === "user" ? { background: "hsl(222,60%,20%)", boxShadow: "0 2px 8px hsl(222,60%,20%,0.25)" } : { boxShadow: "0 1px 3px hsl(220,14%,10%,0.07)" }}
+              <div
+                className="max-w-[82%] rounded-2xl px-4 py-3 text-sm"
+                style={msg.role === "user" ? {
+                  background: "linear-gradient(135deg, hsl(217,92%,55%), hsl(222,70%,40%))",
+                  boxShadow: "0 4px 16px hsl(217,92%,60%,0.3)",
+                  color: "white",
+                } : {
+                  background: "hsl(222,22%,12%)",
+                  border: "1px solid hsl(222,18%,18%)",
+                  color: "hsl(210,20%,80%)",
+                  boxShadow: "0 2px 12px hsl(222,40%,4%,0.4)",
+                }}
               >
                 {msg.image && (
                   <img src={msg.image} alt="chart" className="rounded-xl mb-2 max-h-40 object-cover w-full" />
@@ -172,8 +224,14 @@ export default function AICoach() {
                 />
               </div>
               {msg.role === "user" && (
-                <div className="w-7 h-7 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
-                  <User className="w-3.5 h-3.5 text-slate-500" />
+                <div
+                  className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                  style={{
+                    background: "hsl(222,20%,16%)",
+                    border: "1px solid hsl(222,18%,20%)",
+                  }}
+                >
+                  <User className="w-3.5 h-3.5" style={{ color: "hsl(215,15%,50%)" }} />
                 </div>
               )}
             </motion.div>
@@ -182,15 +240,31 @@ export default function AICoach() {
 
         {geminiLoading && (
           <div className="flex gap-2.5 justify-start">
-            <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0" style={{ background: "hsl(222,60%,20%)" }}>
+            <div
+              className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 ai-active"
+              style={{
+                background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,42%))",
+                boxShadow: "0 2px 8px hsl(217,92%,60%,0.3)",
+              }}
+            >
               <Bot className="w-3.5 h-3.5 text-white" />
             </div>
-            <div className="bg-white border border-slate-100 rounded-2xl px-4 py-3" style={{ boxShadow: "0 1px 3px hsl(220,14%,10%,0.07)" }}>
+            <div
+              className="rounded-2xl px-4 py-3"
+              style={{
+                background: "hsl(222,22%,12%)",
+                border: "1px solid hsl(222,18%,18%)",
+                boxShadow: "0 2px 12px hsl(222,40%,4%,0.4)",
+              }}
+            >
               <div className="flex gap-1 items-center h-5">
                 {[0, 1, 2].map(i => (
-                  <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-slate-300"
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+                  <motion.div
+                    key={i}
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ background: "hsl(217,92%,60%)" }}
+                    animate={{ y: [0, -4, 0], opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 0.7, repeat: Infinity, delay: i * 0.18 }}
                   />
                 ))}
               </div>
@@ -200,13 +274,19 @@ export default function AICoach() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggested prompts */}
+      {/* ── SUGGESTED PROMPTS ── */}
       {messages.length <= 1 && (
         <div className="px-4 pb-2 flex gap-2 overflow-x-auto scrollbar-none">
           {SUGGESTED.map(s => (
-            <button key={s} onClick={() => handleSend(s)}
-              className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-600 whitespace-nowrap hover:border-blue-300 hover:text-blue-600 transition-all"
-              style={{ boxShadow: "0 1px 3px hsl(220,14%,10%,0.06)" }}
+            <button
+              key={s}
+              onClick={() => handleSend(s)}
+              className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-xl whitespace-nowrap transition-all hover:opacity-80"
+              style={{
+                background: "hsl(222,22%,13%)",
+                border: "1px solid hsl(222,18%,20%)",
+                color: "hsl(215,20%,55%)",
+              }}
             >
               {s}
             </button>
@@ -214,19 +294,26 @@ export default function AICoach() {
         </div>
       )}
 
-      {/* Input area */}
+      {/* ── INPUT AREA ── */}
       <div className="px-4 pb-4 space-y-2">
         {geminiError && (
-          <p className="text-xs text-red-500 bg-red-50 rounded-xl px-3 py-2">{geminiError}</p>
+          <p
+            className="text-xs rounded-xl px-3 py-2"
+            style={{ background: "hsl(0,72%,58%,0.1)", color: "hsl(0,72%,65%)", border: "1px solid hsl(0,72%,58%,0.2)" }}
+          >
+            {geminiError}
+          </p>
         )}
 
-        {/* Image preview */}
         {previewImage && (
           <div className="relative inline-block">
-            <img src={previewImage} alt="preview" className="h-16 rounded-xl object-cover border border-slate-200" />
-            <button onClick={() => { setPreviewImage(null); setImageFile(null); }}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-slate-800 text-white flex items-center justify-center">
-              <X className="w-3 h-3" />
+            <img src={previewImage} alt="preview" className="h-16 rounded-xl object-cover" style={{ border: "1px solid hsl(222,18%,22%)" }} />
+            <button
+              onClick={() => { setPreviewImage(null); setImageFile(null); }}
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
+              style={{ background: "hsl(222,22%,18%)", border: "1px solid hsl(222,18%,24%)" }}
+            >
+              <X className="w-3 h-3" style={{ color: "hsl(210,20%,60%)" }} />
             </button>
           </div>
         )}
@@ -235,32 +322,32 @@ export default function AICoach() {
           <button
             onClick={() => fileRef.current?.click()}
             disabled={geminiLoading}
-            className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-blue-500 hover:border-blue-300 transition-all shrink-0"
-            style={{ boxShadow: "0 1px 3px hsl(220,14%,10%,0.06)" }}
+            className="w-11 h-11 rounded-xl flex items-center justify-center transition-all shrink-0 hover:opacity-80"
+            style={{
+              background: "hsl(222,22%,13%)",
+              border: "1px solid hsl(222,18%,18%)",
+              color: "hsl(215,15%,40%)",
+            }}
           >
             <ImagePlus className="w-4.5 h-4.5" />
           </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageSelect}
-          />
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSend()}
             placeholder="Ask your coach anything..."
             disabled={geminiLoading}
-            className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 disabled:opacity-50 outline-none focus:border-blue-300 transition-all"
-            style={{ boxShadow: "0 1px 3px hsl(220,14%,10%,0.06)" }}
+            className="flex-1 rounded-xl px-4 py-3 text-sm disabled:opacity-50 premium-input"
           />
           <button
             onClick={() => handleSend()}
             disabled={geminiLoading || (!input.trim() && !imageFile)}
             className="w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0 transition-all active:scale-95 disabled:opacity-40"
-            style={{ background: "hsl(222,60%,20%)", boxShadow: "0 2px 8px hsl(222,60%,20%,0.3)" }}
+            style={{
+              background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,42%))",
+              boxShadow: "0 4px 16px hsl(217,92%,60%,0.4)",
+            }}
           >
             <Send className="w-4 h-4" />
           </button>
