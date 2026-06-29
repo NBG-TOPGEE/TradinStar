@@ -4,492 +4,611 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Cog, User, DollarSign, TrendingUp, Bell, Brain, Shield,
-  Save, ChevronRight, AlertTriangle, Trash2, KeyRound, Mail, LogOut
+  Save, AlertTriangle, Trash2, KeyRound, Mail, LogOut, CircleDot, Check
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
+// ── Constants ─────────────────────────────────────────────────────────────
 const TIMEZONES = [
-  "UTC", "America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles",
-  "Europe/London", "Europe/Paris", "Europe/Berlin", "Asia/Dubai", "Asia/Tokyo",
-  "Asia/Singapore", "Asia/Hong_Kong", "Australia/Sydney", "Africa/Lagos", "Africa/Johannesburg",
+  "UTC","America/New_York","America/Chicago","America/Denver","America/Los_Angeles",
+  "Europe/London","Europe/Paris","Europe/Berlin","Asia/Dubai","Asia/Tokyo",
+  "Asia/Singapore","Asia/Hong_Kong","Australia/Sydney","Africa/Lagos","Africa/Johannesburg",
 ];
+const CURRENCIES = ["USD","EUR","GBP","JPY","CAD","AUD","CHF","NGN","ZAR"];
+const LEVERAGES  = [1,10,20,50,100,200,500];
+const MARKETS    = ["Forex","Crypto","Stocks","Indices","Commodities","Futures"];
+const SESSIONS   = ["Asian","London","New York","London/NY Overlap"];
+const STRATEGIES = [
+  "Smart Money Concepts","ICT","Supply & Demand","Support & Resistance",
+  "Price Action","Breakout","Trend Following","Fibonacci","Elliott Wave",
+  "VWAP","Order Flow","Scalp","Reversal","News","Custom",
+];
+const ASSETS = [
+  "EUR/USD","GBP/USD","USD/JPY","AUD/USD","USD/CAD","GBP/JPY","EUR/GBP",
+  "XAU/USD","XAG/USD","BTC/USD","ETH/USD","NAS100","US30","SPX500","GER40",
+];
+const GOALS = [
+  "Become consistent","Pass a funded challenge","Improve discipline",
+  "Reduce emotional trading","Improve psychology","Increase profitability",
+  "Build a trading system","Trade full-time",
+];
+const STYLES_MAP = [
+  { val: "scalping", label: "Scalper" },
+  { val: "day_trading", label: "Day Trader" },
+  { val: "swing_trading", label: "Swing Trader" },
+  { val: "position_trading", label: "Position Trader" },
+];
+const EXPERIENCE_OPTS = [
+  { val: "beginner", label: "Beginner" },
+  { val: "intermediate", label: "Intermediate" },
+  { val: "advanced", label: "Advanced" },
+];
+const AI_STYLES = ["Strict","Balanced","Encouraging"];
+const AI_FOCUS  = ["Risk Management","Psychology","Strategy","Consistency","All"];
 
-const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "NGN", "ZAR"];
-const SESSIONS   = ["Sydney", "Tokyo", "London", "New York"];
-const STRATEGIES = ["Breakout", "Trend", "Scalp", "Reversal", "News", "Support/Resistance"];
-const STYLES     = ["Scalper", "Day Trader", "Swing Trader", "Position Trader"];
-const MARKETS    = ["Forex", "Crypto", "Stocks", "Indices", "Commodities", "Futures"];
-const AI_STYLES  = ["Strict", "Balanced", "Encouraging"];
-const AI_FOCUS   = ["Risk Management", "Psychology", "Strategy", "Consistency", "All"];
-const PAIRS      = ["EUR/USD","GBP/USD","USD/JPY","AUD/USD","USD/CAD","NZD/USD","XAU/USD","GBP/JPY","EUR/GBP","BTC/USD","ETH/USD","US30","NAS100","SPX500"];
-const LEVERAGES  = [1, 10, 20, 50, 100, 200, 500];
-
-type Section = "profile" | "account" | "trading" | "ai" | "notifications" | "security";
-
+type Section = "profile" | "trader" | "account" | "ai" | "notifications" | "security";
 const NAV: { id: Section; label: string; icon: any }[] = [
-  { id: "profile",       label: "Profile",        icon: User },
-  { id: "account",       label: "Account & Risk",  icon: DollarSign },
-  { id: "trading",       label: "Trading Prefs",   icon: TrendingUp },
-  { id: "ai",            label: "AI Coach",        icon: Brain },
-  { id: "notifications", label: "Notifications",   icon: Bell },
-  { id: "security",      label: "Security",        icon: Shield },
+  { id: "profile",       label: "Profile",       icon: User },
+  { id: "trader",        label: "Trader DNA",    icon: CircleDot },
+  { id: "account",       label: "Account",       icon: DollarSign },
+  { id: "ai",            label: "AI Coach",      icon: Brain },
+  { id: "notifications", label: "Alerts",        icon: Bell },
+  { id: "security",      label: "Security",      icon: Shield },
 ];
 
+// ── Shared input styles ───────────────────────────────────────────────────
+const INPUT: React.CSSProperties = {
+  width: "100%",
+  background: "hsl(222,22%,11%)",
+  border: "1px solid hsl(222,18%,18%)",
+  borderRadius: "0.875rem",
+  color: "hsl(210,30%,88%)",
+  fontSize: "0.875rem",
+  padding: "0.75rem 1rem",
+  outline: "none",
+};
+const SELECT: React.CSSProperties = { ...INPUT };
+const LABEL: React.CSSProperties = {
+  fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em",
+  textTransform: "uppercase", color: "hsl(215,15%,35%)",
+  marginBottom: "0.5rem", display: "block",
+};
+
+// ── Reusable chips ────────────────────────────────────────────────────────
+function Chip({ label, active, onClick, accent = "hsl(217,92%,60%)" }: {
+  label: string; active: boolean; onClick: () => void; accent?: string;
+}) {
+  return (
+    <button onClick={onClick}
+      className="px-3 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
+      style={active ? {
+        background: `${accent}18`, border: `1.5px solid ${accent}`, color: accent,
+      } : {
+        background: "hsl(222,22%,12%)", border: "1px solid hsl(222,18%,17%)", color: "hsl(215,15%,45%)"
+      }}>
+      {active && <Check className="inline w-2.5 h-2.5 mr-1 -mt-0.5" />}{label}
+    </button>
+  );
+}
+
+// ── Toggle ────────────────────────────────────────────────────────────────
+function Toggle({ val, onChange, label, desc }: {
+  val: boolean; onChange: (v: boolean) => void; label: string; desc: string;
+}) {
+  return (
+    <div className="flex items-center justify-between py-3.5" style={{ borderBottom: "1px solid hsl(222,18%,14%)" }}>
+      <div>
+        <p className="text-sm font-semibold" style={{ color: "hsl(210,25%,78%)" }}>{label}</p>
+        <p className="text-xs mt-0.5" style={{ color: "hsl(215,15%,38%)" }}>{desc}</p>
+      </div>
+      <button onClick={() => onChange(!val)}
+        className="relative w-11 h-6 rounded-full transition-all shrink-0 ml-4"
+        style={{ background: val ? "hsl(217,92%,60%)" : "hsl(222,20%,20%)" }}>
+        <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
+          style={{ left: val ? "1.375rem" : "0.125rem" }} />
+      </button>
+    </div>
+  );
+}
+
+// ── Section card ──────────────────────────────────────────────────────────
+function SCard({ title, icon: Icon, accent = "hsl(217,92%,60%)", children }: {
+  title: string; icon: any; accent?: string; children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl overflow-hidden mb-4" style={{
+      background: "hsl(222,22%,10%)", border: "1px solid hsl(222,18%,15%)",
+      boxShadow: "0 4px 20px hsl(222,40%,4%,0.5)"
+    }}>
+      <div className="px-5 py-4 flex items-center gap-3" style={{ borderBottom: "1px solid hsl(222,18%,14%)" }}>
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${accent}15`, border: `1px solid ${accent}20` }}>
+          <Icon className="w-4 h-4" style={{ color: accent }} />
+        </div>
+        <p className="font-bold text-sm" style={{ color: "hsl(210,25%,80%)" }}>{title}</p>
+      </div>
+      <div className="p-5 space-y-4">{children}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Settings
+// ─────────────────────────────────────────────────────────────────────────────
 export default function Settings() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [active, setActive] = useState<Section>("profile");
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate("/auth");
-  };
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Profile
-  const [displayName,    setDisplayName]    = useState("");
-  const [timezone,       setTimezone]       = useState("UTC");
-  const [country,        setCountry]        = useState("");
+  // Profile fields
+  const [displayName, setDisplayName] = useState("");
+  const [timezone, setTimezone]       = useState("UTC");
+  const [country, setCountry]         = useState("");
 
-  // Account & Risk
+  // Account fields
   const [accountBalance,    setAccountBalance]    = useState("10000");
   const [accountCurrency,   setAccountCurrency]   = useState("USD");
   const [defaultRisk,       setDefaultRisk]       = useState("1");
-  const [defaultPositionSize, setDefaultPositionSize] = useState("0.01");
+  const [defaultLotSize,    setDefaultLotSize]    = useState("0.01");
   const [maxDailyLoss,      setMaxDailyLoss]      = useState("0");
   const [maxDrawdown,       setMaxDrawdown]       = useState("0");
   const [leverage,          setLeverage]          = useState("100");
 
-  // Trading Preferences
-  const [tradingStyle,    setTradingStyle]    = useState("Day Trader");
-  const [marketsTraded,   setMarketsTraded]   = useState<string[]>(["Forex"]);
-  const [preferredPairs,  setPreferredPairs]  = useState<string[]>([]);
-  const [defaultSession,  setDefaultSession]  = useState("London");
-  const [defaultStrategy, setDefaultStrategy] = useState("Breakout");
+  // Trader DNA fields (trader_profiles table)
+  const [experience,       setExperience]       = useState("");
+  const [tradingStyle,     setTradingStyle]     = useState("");
+  const [markets,          setMarkets]          = useState<string[]>([]);
+  const [strategies,       setStrategies]       = useState<string[]>([]);
+  const [favAssets,        setFavAssets]        = useState<string[]>([]);
+  const [tradingSessions,  setTradingSessions]  = useState<string[]>([]);
+  const [riskPerTrade,     setRiskPerTrade]     = useState(1);
+  const [preferredRR,      setPreferredRR]      = useState(2);
+  const [maxTradesPerDay,  setMaxTradesPerDay]  = useState(3);
+  const [profileGoals,     setProfileGoals]     = useState<string[]>([]);
 
-  // AI Coach
+  // AI fields
   const [aiCoachingStyle, setAiCoachingStyle] = useState("Balanced");
   const [aiFocusAreas,    setAiFocusAreas]    = useState<string[]>(["All"]);
 
-  // Notifications
-  const [notifDailyLoss,    setNotifDailyLoss]    = useState(true);
+  // Notification fields
+  const [notifDailyLoss,     setNotifDailyLoss]     = useState(true);
   const [notifWeeklySummary, setNotifWeeklySummary] = useState(true);
-  const [notifDrawdownWarn, setNotifDrawdownWarn]  = useState(true);
+  const [notifDrawdownWarn,  setNotifDrawdownWarn]  = useState(true);
 
-  // Security
+  // Security fields
   const [newEmail,       setNewEmail]       = useState("");
   const [newPassword,    setNewPassword]    = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPw,      setConfirmPw]      = useState("");
   const [deleteConfirm,  setDeleteConfirm]  = useState("");
 
-  // Load profile from Supabase
+  const toggleArr = (arr: string[], val: string, set: (v: string[]) => void) =>
+    set(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
+
   useEffect(() => {
+    if (!user) return;
     const load = async () => {
-      if (!user) return;
-      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      if (data) {
-        setDisplayName(data.display_name || user.user_metadata?.display_name || "");
-        setTimezone(data.timezone || "UTC");
-        setCountry(data.country || "");
-        setAccountBalance(String(data.account_balance || "10000"));
-        setAccountCurrency(data.account_currency || "USD");
-        setDefaultRisk(String(data.default_risk_percent || "1"));
-        setDefaultPositionSize(String(data.default_position_size || "0.01"));
-        setMaxDailyLoss(String(data.max_daily_loss || "0"));
-        setMaxDrawdown(String(data.max_drawdown || "0"));
-        setLeverage(String(data.leverage || "100"));
-        setTradingStyle(data.trading_style || "Day Trader");
-        setMarketsTraded(data.markets_traded || ["Forex"]);
-        setPreferredPairs(data.preferred_pairs || []);
-        setDefaultSession(data.default_session || "London");
-        setDefaultStrategy(data.default_strategy || "Breakout");
-        setAiCoachingStyle(data.ai_coaching_style || "Balanced");
-        setAiFocusAreas(data.ai_focus_areas || ["All"]);
-        setNotifDailyLoss(data.notif_daily_loss ?? true);
-        setNotifWeeklySummary(data.notif_weekly_summary ?? true);
-        setNotifDrawdownWarn(data.notif_drawdown_warn ?? true);
+      const [{ data: p }, { data: tp }] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).single(),
+        supabase.from("trader_profiles" as any).select("*").eq("id", user.id).maybeSingle(),
+      ]);
+      if (p) {
+        setDisplayName(p.display_name || user.user_metadata?.display_name || "");
+        setTimezone(p.timezone || "UTC");
+        setCountry(p.country || "");
+        setAccountBalance(String(p.account_balance || "10000"));
+        setAccountCurrency(p.account_currency || "USD");
+        setDefaultRisk(String(p.default_risk_percent || "1"));
+        setDefaultLotSize(String(p.default_position_size || "0.01"));
+        setMaxDailyLoss(String(p.max_daily_loss || "0"));
+        setMaxDrawdown(String(p.max_drawdown || "0"));
+        setLeverage(String(p.leverage || "100"));
+        setAiCoachingStyle(p.ai_coaching_style || "Balanced");
+        setAiFocusAreas(p.ai_focus_areas || ["All"]);
+        setNotifDailyLoss(p.notif_daily_loss ?? true);
+        setNotifWeeklySummary(p.notif_weekly_summary ?? true);
+        setNotifDrawdownWarn(p.notif_drawdown_warn ?? true);
       } else {
         setDisplayName(user.user_metadata?.display_name || "");
+      }
+      if (tp) {
+        setExperience(tp.experience || "");
+        setTradingStyle(tp.trading_style || "");
+        setMarkets(tp.markets || []);
+        setStrategies(tp.strategies || []);
+        setFavAssets(tp.favorite_assets || []);
+        setTradingSessions(tp.trading_sessions || []);
+        setRiskPerTrade(Number(tp.risk_per_trade) || 1);
+        setPreferredRR(Number(tp.preferred_rr) || 2);
+        setMaxTradesPerDay(Number(tp.max_trades_per_day) || 3);
+        setProfileGoals(tp.goals || []);
       }
       setLoading(false);
     };
     load();
   }, [user]);
 
-  const toggleArr = (arr: string[], val: string, set: (v: string[]) => void) => {
-    set(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
-  };
-
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
-    const profileData = {
-      display_name: displayName,
-      timezone, country,
-      account_balance: parseFloat(accountBalance) || 0,
-      account_currency: accountCurrency,
-      default_risk_percent: parseFloat(defaultRisk) || 1,
-      default_position_size: parseFloat(defaultPositionSize) || 0.01,
-      max_daily_loss: parseFloat(maxDailyLoss) || 0,
-      max_drawdown: parseFloat(maxDrawdown) || 0,
-      leverage: parseInt(leverage) || 100,
-      trading_style: tradingStyle,
-      markets_traded: marketsTraded,
-      preferred_pairs: preferredPairs,
-      default_session: defaultSession,
-      default_strategy: defaultStrategy,
-      ai_coaching_style: aiCoachingStyle,
-      ai_focus_areas: aiFocusAreas,
-      notif_daily_loss: notifDailyLoss,
-      notif_weekly_summary: notifWeeklySummary,
-      notif_drawdown_warn: notifDrawdownWarn,
-    };
-
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .upsert({ id: user.id, ...profileData });
-
-    // Also sync display_name to auth metadata
+    const [pr, tp] = await Promise.all([
+      supabase.from("profiles").upsert({
+        id: user.id,
+        display_name: displayName, timezone, country,
+        account_balance: parseFloat(accountBalance) || 0,
+        account_currency: accountCurrency,
+        default_risk_percent: parseFloat(defaultRisk) || 1,
+        default_position_size: parseFloat(defaultLotSize) || 0.01,
+        max_daily_loss: parseFloat(maxDailyLoss) || 0,
+        max_drawdown: parseFloat(maxDrawdown) || 0,
+        leverage: parseInt(leverage) || 100,
+        ai_coaching_style: aiCoachingStyle,
+        ai_focus_areas: aiFocusAreas,
+        notif_daily_loss: notifDailyLoss,
+        notif_weekly_summary: notifWeeklySummary,
+        notif_drawdown_warn: notifDrawdownWarn,
+      }),
+      supabase.from("trader_profiles" as any).upsert({
+        id: user.id,
+        experience, trading_style: tradingStyle,
+        markets, strategies,
+        favorite_assets: favAssets,
+        trading_sessions: tradingSessions,
+        risk_per_trade: riskPerTrade,
+        preferred_rr: preferredRR,
+        max_trades_per_day: maxTradesPerDay,
+        goals: profileGoals,
+        onboarding_completed: true,
+      }),
+    ]);
     await supabase.auth.updateUser({ data: { display_name: displayName } });
-
+    await refreshProfile();
     setSaving(false);
-    if (profileError) toast.error(profileError.message);
+    if (pr.error || tp.error) toast.error("Save failed — check console");
     else toast.success("Settings saved!");
   };
 
-  const handleChangeEmail = async () => {
-    if (!newEmail) return toast.error("Enter a new email");
-    const { error } = await supabase.auth.updateUser({ email: newEmail });
-    if (error) toast.error(error.message);
-    else { toast.success("Confirmation sent to new email"); setNewEmail(""); }
-  };
-
-  const handleChangePassword = async () => {
-    if (!newPassword) return toast.error("Enter a new password");
-    if (newPassword !== confirmPassword) return toast.error("Passwords don't match");
-    if (newPassword.length < 6) return toast.error("Password must be at least 6 characters");
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) toast.error(error.message);
-    else { toast.success("Password updated!"); setNewPassword(""); setConfirmPassword(""); }
-  };
-
-  const handleDeleteAccount = async () => {
-    if (deleteConfirm !== "DELETE") return toast.error("Type DELETE to confirm");
-    toast.error("Contact support@tradinstar.com to delete your account.");
-    setDeleteConfirm("");
-  };
-
-  const inputClass = "w-full bg-white border border-slate-200 rounded-xl px-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-300 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-all";
-  const selectClass = "w-full bg-white border border-slate-200 rounded-xl px-3.5 py-3 text-sm text-slate-800 outline-none focus:border-blue-400 transition-all";
-  const labelClass = "text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide";
-
-  const ChipBtn = ({ val, active, onClick }: { val: string; active: boolean; onClick: () => void }) => (
+  const SBtn = ({ label, active: a, onClick }: { label: string; active: boolean; onClick: () => void }) => (
     <button onClick={onClick}
-      className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all border ${active
-        ? "text-white border-transparent"
-        : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"}`}
-      style={active ? { background: "hsl(222,60%,20%)" } : {}}>
-      {val}
+      className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all"
+      style={a ? {
+        background: "hsl(217,92%,60%,0.12)", border: "1px solid hsl(217,92%,60%,0.25)",
+        color: "hsl(217,92%,65%)"
+      } : {
+        background: "hsl(222,22%,12%)", border: "1px solid hsl(222,18%,17%)",
+        color: "hsl(215,15%,45%)"
+      }}>
+      {label}
+      {a && <Check className="w-3 h-3" />}
     </button>
-  );
-
-  const Toggle = ({ val, onChange, label, desc }: { val: boolean; onChange: (v: boolean) => void; label: string; desc: string }) => (
-    <div className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0">
-      <div>
-        <p className="text-sm font-medium text-slate-800">{label}</p>
-        <p className="text-xs text-slate-400 mt-0.5">{desc}</p>
-      </div>
-      <button onClick={() => onChange(!val)}
-        className={`relative w-11 h-6 rounded-full transition-all ${val ? "bg-blue-500" : "bg-slate-200"}`}>
-        <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${val ? "left-5" : "left-0.5"}`} />
-      </button>
-    </div>
-  );
-
-  const SectionCard = ({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) => (
-    <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden mb-4" style={{ boxShadow: "0 1px 4px hsl(220,14%,10%,0.07)" }}>
-      <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-slate-100">
-          <Icon className="w-4 h-4 text-slate-500" />
-        </div>
-        <p className="font-semibold text-slate-800 text-sm">{title}</p>
-      </div>
-      <div className="p-5 space-y-4">{children}</div>
-    </div>
   );
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <div className="w-6 h-6 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "hsl(222,20%,20%)", borderTopColor: "hsl(217,92%,60%)" }} />
     </div>
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-6 pb-12">
+    <div className="max-w-2xl mx-auto px-4 pt-6 pb-16">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-6">
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "hsl(222,60%,20%)" }}>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{
+          background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,42%))",
+          boxShadow: "0 4px 12px hsl(217,92%,60%,0.4)"
+        }}>
           <Cog className="w-4 h-4 text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Settings</h1>
-          <p className="text-xs text-slate-400">{user?.email}</p>
+          <h1 className="text-xl font-bold" style={{ color: "hsl(210,30%,92%)" }}>Settings</h1>
+          <p className="text-xs" style={{ color: "hsl(215,15%,38%)" }}>{user?.email}</p>
         </div>
       </div>
 
       {/* Nav tabs */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 mb-6 scrollbar-hide">
+      <div className="flex gap-1.5 overflow-x-auto pb-1 mb-6 scrollbar-none">
         {NAV.map(({ id, label, icon: Icon }) => (
           <button key={id} onClick={() => setActive(id)}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${active === id
-              ? "text-white"
-              : "bg-white border border-slate-200 text-slate-500 hover:border-slate-300"}`}
-            style={active === id ? { background: "hsl(222,60%,20%)" } : {}}>
-            <Icon className="w-3.5 h-3.5" />
-            {label}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all"
+            style={active === id ? {
+              background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,42%))",
+              color: "white", boxShadow: "0 3px 10px hsl(217,92%,60%,0.3)",
+              border: "1px solid transparent"
+            } : {
+              background: "hsl(222,22%,12%)", border: "1px solid hsl(222,18%,17%)",
+              color: "hsl(215,15%,48%)"
+            }}>
+            <Icon className="w-3.5 h-3.5" />{label}
           </button>
         ))}
       </div>
 
       {/* ── PROFILE ── */}
       {active === "profile" && (
-        <SectionCard title="Profile" icon={User}>
+        <SCard title="Profile" icon={User}>
           <div>
-            <label className={labelClass}>Display Name</label>
-            <input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Your trading name" className={inputClass} />
+            <label style={LABEL}>Display Name</label>
+            <input value={displayName} onChange={e => setDisplayName(e.target.value)}
+              placeholder="Your trading name" style={INPUT} />
           </div>
           <div>
-            <label className={labelClass}>Timezone</label>
-            <select value={timezone} onChange={e => setTimezone(e.target.value)} className={selectClass}>
-              {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz.replace("_", " ")}</option>)}
+            <label style={LABEL}>Timezone</label>
+            <select value={timezone} onChange={e => setTimezone(e.target.value)} style={SELECT}>
+              {TIMEZONES.map(tz => <option key={tz} style={{ background: "hsl(222,22%,10%)" }}>{tz.replace("_", " ")}</option>)}
             </select>
-            <p className="text-[11px] text-slate-400 mt-1">Used to align trade timestamps with your local time</p>
           </div>
           <div>
-            <label className={labelClass}>Country</label>
-            <input value={country} onChange={e => setCountry(e.target.value)} placeholder="e.g. Nigeria, UK, USA" className={inputClass} />
+            <label style={LABEL}>Country</label>
+            <input value={country} onChange={e => setCountry(e.target.value)}
+              placeholder="e.g. Nigeria, UK, USA" style={INPUT} />
           </div>
-        </SectionCard>
+        </SCard>
       )}
 
-      {/* ── ACCOUNT & RISK ── */}
+      {/* ── TRADER DNA ── */}
+      {active === "trader" && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <SCard title="Trader DNA" icon={CircleDot} accent="hsl(217,92%,60%)">
+            <div>
+              <label style={LABEL}>Experience Level</label>
+              <div className="flex gap-2">
+                {EXPERIENCE_OPTS.map(e => (
+                  <SBtn key={e.val} label={e.label} active={experience === e.val} onClick={() => setExperience(e.val)} />
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={LABEL}>Trading Style</label>
+              <div className="grid grid-cols-2 gap-2">
+                {STYLES_MAP.map(s => (
+                  <SBtn key={s.val} label={s.label} active={tradingStyle === s.val} onClick={() => setTradingStyle(s.val)} />
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={LABEL}>Markets</label>
+              <div className="flex flex-wrap gap-2">
+                {MARKETS.map(m => (
+                  <Chip key={m} label={m} active={markets.includes(m)} onClick={() => toggleArr(markets, m, setMarkets)} />
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={LABEL}>Strategies</label>
+              <div className="flex flex-wrap gap-2">
+                {STRATEGIES.map(s => (
+                  <Chip key={s} label={s} active={strategies.includes(s)} onClick={() => toggleArr(strategies, s, setStrategies)} />
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={LABEL}>Favourite Assets</label>
+              <div className="flex flex-wrap gap-2">
+                {ASSETS.map(a => (
+                  <Chip key={a} label={a} active={favAssets.includes(a)} onClick={() => toggleArr(favAssets, a, setFavAssets)} accent="hsl(158,68%,46%)" />
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={LABEL}>Trading Sessions</label>
+              <div className="flex flex-wrap gap-2">
+                {SESSIONS.map(s => (
+                  <Chip key={s} label={s} active={tradingSessions.includes(s)} onClick={() => toggleArr(tradingSessions, s, setTradingSessions)} accent="hsl(280,65%,62%)" />
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={LABEL}>Goals</label>
+              <div className="flex flex-wrap gap-2">
+                {GOALS.map(g => (
+                  <Chip key={g} label={g} active={profileGoals.includes(g)} onClick={() => toggleArr(profileGoals, g, setProfileGoals)} accent="hsl(38,92%,56%)" />
+                ))}
+              </div>
+            </div>
+          </SCard>
+
+          <SCard title="Risk Profile" icon={TrendingUp} accent="hsl(38,92%,56%)">
+            {[
+              { label: "Risk per trade (%)", val: riskPerTrade, set: setRiskPerTrade, min: 0.25, max: 10, step: 0.25, suffix: "%" },
+              { label: "Preferred RR", val: preferredRR, set: setPreferredRR, min: 1, max: 10, step: 0.5, suffix: ":1" },
+              { label: "Max trades per day", val: maxTradesPerDay, set: setMaxTradesPerDay, min: 1, max: 20, step: 1, suffix: "" },
+            ].map(({ label, val, set, min, max, step, suffix }) => (
+              <div key={label}>
+                <div className="flex items-center justify-between mb-2">
+                  <label style={{ ...LABEL, marginBottom: 0 }}>{label}</label>
+                  <span className="text-sm font-bold font-mono" style={{ color: "hsl(38,92%,62%)" }}>{val}{suffix}</span>
+                </div>
+                <input type="range" min={min} max={max} step={step} value={val}
+                  onChange={e => set(parseFloat(e.target.value))}
+                  className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                  style={{ background: `linear-gradient(to right, hsl(38,92%,56%) 0%, hsl(38,92%,56%) ${((val - min) / (max - min)) * 100}%, hsl(222,20%,18%) ${((val - min) / (max - min)) * 100}%, hsl(222,20%,18%) 100%)` }}
+                />
+              </div>
+            ))}
+          </SCard>
+        </motion.div>
+      )}
+
+      {/* ── ACCOUNT ── */}
       {active === "account" && (
-        <SectionCard title="Account & Risk" icon={DollarSign}>
+        <SCard title="Account & Risk" icon={DollarSign} accent="hsl(158,68%,46%)">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Account Balance</label>
-              <input type="number" value={accountBalance} onChange={e => setAccountBalance(e.target.value)} placeholder="10000" className={inputClass} />
+              <label style={LABEL}>Balance</label>
+              <input type="number" value={accountBalance} onChange={e => setAccountBalance(e.target.value)} style={INPUT} placeholder="10000" />
             </div>
             <div>
-              <label className={labelClass}>Currency</label>
-              <select value={accountCurrency} onChange={e => setAccountCurrency(e.target.value)} className={selectClass}>
-                {CURRENCIES.map(c => <option key={c}>{c}</option>)}
+              <label style={LABEL}>Currency</label>
+              <select value={accountCurrency} onChange={e => setAccountCurrency(e.target.value)} style={SELECT}>
+                {CURRENCIES.map(c => <option key={c} style={{ background: "hsl(222,22%,10%)" }}>{c}</option>)}
               </select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Default Risk %</label>
-              <input type="number" step="0.1" min="0.1" max="100" value={defaultRisk} onChange={e => setDefaultRisk(e.target.value)} placeholder="1" className={inputClass} />
-              <p className="text-[11px] text-slate-400 mt-1">% of balance per trade</p>
+              <label style={LABEL}>Default Risk %</label>
+              <input type="number" step="0.1" value={defaultRisk} onChange={e => setDefaultRisk(e.target.value)} style={INPUT} placeholder="1" />
             </div>
             <div>
-              <label className={labelClass}>Default Lot Size</label>
-              <input type="number" step="0.01" min="0.01" value={defaultPositionSize} onChange={e => setDefaultPositionSize(e.target.value)} placeholder="0.01" className={inputClass} />
+              <label style={LABEL}>Default Lot Size</label>
+              <input type="number" step="0.01" value={defaultLotSize} onChange={e => setDefaultLotSize(e.target.value)} style={INPUT} placeholder="0.01" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Max Daily Loss ($)</label>
-              <input type="number" value={maxDailyLoss} onChange={e => setMaxDailyLoss(e.target.value)} placeholder="0" className={inputClass} />
-              <p className="text-[11px] text-slate-400 mt-1">Stop trading if hit</p>
+              <label style={LABEL}>Max Daily Loss ($)</label>
+              <input type="number" value={maxDailyLoss} onChange={e => setMaxDailyLoss(e.target.value)} style={INPUT} />
             </div>
             <div>
-              <label className={labelClass}>Max Drawdown ($)</label>
-              <input type="number" value={maxDrawdown} onChange={e => setMaxDrawdown(e.target.value)} placeholder="0" className={inputClass} />
-              <p className="text-[11px] text-slate-400 mt-1">Account-level limit</p>
+              <label style={LABEL}>Max Drawdown ($)</label>
+              <input type="number" value={maxDrawdown} onChange={e => setMaxDrawdown(e.target.value)} style={INPUT} />
             </div>
           </div>
           <div>
-            <label className={labelClass}>Leverage</label>
-            <div className="flex gap-2 flex-wrap">
+            <label style={LABEL}>Leverage</label>
+            <div className="flex flex-wrap gap-2">
               {LEVERAGES.map(l => (
-                <ChipBtn key={l} val={`1:${l}`} active={leverage === String(l)} onClick={() => setLeverage(String(l))} />
+                <Chip key={l} label={`1:${l}`} active={leverage === String(l)} onClick={() => setLeverage(String(l))} />
               ))}
             </div>
           </div>
-        </SectionCard>
-      )}
-
-      {/* ── TRADING PREFERENCES ── */}
-      {active === "trading" && (
-        <SectionCard title="Trading Preferences" icon={TrendingUp}>
-          <div>
-            <label className={labelClass}>Trading Style</label>
-            <div className="flex gap-2 flex-wrap">
-              {STYLES.map(s => (
-                <ChipBtn key={s} val={s} active={tradingStyle === s} onClick={() => setTradingStyle(s)} />
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>Markets Traded</label>
-            <div className="flex gap-2 flex-wrap">
-              {MARKETS.map(m => (
-                <ChipBtn key={m} val={m} active={marketsTraded.includes(m)} onClick={() => toggleArr(marketsTraded, m, setMarketsTraded)} />
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>Preferred Pairs</label>
-            <div className="flex gap-2 flex-wrap">
-              {PAIRS.map(p => (
-                <ChipBtn key={p} val={p} active={preferredPairs.includes(p)} onClick={() => toggleArr(preferredPairs, p, setPreferredPairs)} />
-              ))}
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Default Session</label>
-              <select value={defaultSession} onChange={e => setDefaultSession(e.target.value)} className={selectClass}>
-                {SESSIONS.map(s => <option key={s}>{s}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className={labelClass}>Default Strategy</label>
-              <select value={defaultStrategy} onChange={e => setDefaultStrategy(e.target.value)} className={selectClass}>
-                {STRATEGIES.map(s => <option key={s}>{s}</option>)}
-              </select>
-            </div>
-          </div>
-        </SectionCard>
+        </SCard>
       )}
 
       {/* ── AI COACH ── */}
       {active === "ai" && (
-        <SectionCard title="AI Coach" icon={Brain}>
+        <SCard title="AI Coach Preferences" icon={Brain} accent="hsl(280,65%,62%)">
           <div>
-            <label className={labelClass}>Coaching Style</label>
-            <p className="text-xs text-slate-400 mb-2">How the AI delivers feedback to you</p>
-            <div className="flex gap-2 flex-wrap">
+            <label style={LABEL}>Coaching Style</label>
+            <div className="grid grid-cols-3 gap-2">
               {AI_STYLES.map(s => (
-                <ChipBtn key={s} val={s} active={aiCoachingStyle === s} onClick={() => setAiCoachingStyle(s)} />
+                <button key={s} onClick={() => setAiCoachingStyle(s)}
+                  className="py-3 rounded-xl text-xs font-bold transition-all"
+                  style={aiCoachingStyle === s ? {
+                    background: "hsl(280,65%,62%,0.15)", border: "1.5px solid hsl(280,65%,62%)",
+                    color: "hsl(280,65%,72%)"
+                  } : {
+                    background: "hsl(222,22%,12%)", border: "1px solid hsl(222,18%,17%)",
+                    color: "hsl(215,15%,45%)"
+                  }}>
+                  {s}
+                </button>
               ))}
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2 mt-3">
               {[
-                { style: "Strict", desc: "Direct, no sugar-coating. Focused on fixing mistakes." },
-                { style: "Balanced", desc: "Mix of praise and critique. Honest but constructive." },
-                { style: "Encouraging", desc: "Positive reinforcement. Motivational tone." },
-              ].map(({ style, desc }) => (
-                <div key={style} className={`p-3 rounded-xl border text-xs ${aiCoachingStyle === style ? "border-blue-200 bg-blue-50 text-blue-700" : "border-slate-100 text-slate-400"}`}>
-                  <p className="font-semibold mb-1">{style}</p>
-                  <p className="leading-relaxed">{desc}</p>
+                { s: "Strict", d: "Direct & blunt. No sugar-coating." },
+                { s: "Balanced", d: "Honest mix of praise and critique." },
+                { s: "Encouraging", d: "Positive reinforcement focused." },
+              ].map(({ s, d }) => (
+                <div key={s} className="p-3 rounded-xl text-[10px] leading-relaxed" style={{
+                  background: aiCoachingStyle === s ? "hsl(280,65%,62%,0.06)" : "hsl(222,20%,12%)",
+                  border: `1px solid ${aiCoachingStyle === s ? "hsl(280,65%,62%,0.18)" : "hsl(222,18%,15%)"}`,
+                  color: "hsl(215,15%,42%)"
+                }}>
+                  <p className="font-bold mb-0.5" style={{ color: "hsl(210,20%,65%)" }}>{s}</p>
+                  {d}
                 </div>
               ))}
             </div>
           </div>
           <div>
-            <label className={labelClass}>Focus Areas</label>
-            <p className="text-xs text-slate-400 mb-2">What should the AI prioritize in its analysis?</p>
-            <div className="flex gap-2 flex-wrap">
+            <label style={LABEL}>Focus Areas</label>
+            <div className="flex flex-wrap gap-2">
               {AI_FOCUS.map(f => (
-                <ChipBtn key={f} val={f} active={aiFocusAreas.includes(f)} onClick={() => toggleArr(aiFocusAreas, f, setAiFocusAreas)} />
+                <Chip key={f} label={f} active={aiFocusAreas.includes(f)}
+                  onClick={() => toggleArr(aiFocusAreas, f, setAiFocusAreas)} accent="hsl(280,65%,62%)" />
               ))}
             </div>
           </div>
-        </SectionCard>
+        </SCard>
       )}
 
       {/* ── NOTIFICATIONS ── */}
       {active === "notifications" && (
-        <SectionCard title="Notifications" icon={Bell}>
-          <Toggle
-            val={notifDailyLoss} onChange={setNotifDailyLoss}
+        <SCard title="Alerts & Notifications" icon={Bell} accent="hsl(38,92%,56%)">
+          <Toggle val={notifDailyLoss} onChange={setNotifDailyLoss}
             label="Daily Loss Limit Alert"
-            desc="Warn me when I approach my max daily loss"
-          />
-          <Toggle
-            val={notifWeeklySummary} onChange={setNotifWeeklySummary}
+            desc="Warn me when I approach my max daily loss" />
+          <Toggle val={notifWeeklySummary} onChange={setNotifWeeklySummary}
             label="Weekly Performance Summary"
-            desc="Receive a summary of your trading week every Monday"
-          />
-          <Toggle
-            val={notifDrawdownWarn} onChange={setNotifDrawdownWarn}
+            desc="Summary of your trading week every Monday" />
+          <Toggle val={notifDrawdownWarn} onChange={setNotifDrawdownWarn}
             label="Drawdown Warning"
-            desc="Alert me when drawdown exceeds my set threshold"
-          />
-        </SectionCard>
+            desc="Alert when drawdown exceeds your set threshold" />
+        </SCard>
       )}
 
       {/* ── SECURITY ── */}
       {active === "security" && (
         <>
-          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden mb-4" style={{ boxShadow: "0 1px 4px hsl(220,14%,10%,0.07)" }}>
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
-                <Mail className="w-4 h-4 text-slate-500" />
+          <SCard title="Change Email" icon={Mail} accent="hsl(217,92%,60%)">
+            <p className="text-xs" style={{ color: "hsl(215,15%,40%)" }}>
+              Current: <span style={{ color: "hsl(210,25%,70%)" }}>{user?.email}</span>
+            </p>
+            <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)}
+              placeholder="New email address" style={INPUT} />
+            <button onClick={async () => {
+              if (!newEmail) return toast.error("Enter a new email");
+              const { error } = await supabase.auth.updateUser({ email: newEmail });
+              if (error) toast.error(error.message);
+              else { toast.success("Confirmation sent"); setNewEmail(""); }
+            }} className="w-full py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2"
+              style={{ background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,42%))" }}>
+              <Mail className="w-4 h-4" /> Update Email
+            </button>
+          </SCard>
+
+          <SCard title="Change Password" icon={KeyRound} accent="hsl(217,92%,60%)">
+            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
+              placeholder="New password (min 6 chars)" style={INPUT} />
+            <input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)}
+              placeholder="Confirm new password" style={{ ...INPUT, marginTop: "0.5rem" }} />
+            <button onClick={async () => {
+              if (!newPassword) return toast.error("Enter a new password");
+              if (newPassword !== confirmPw) return toast.error("Passwords don't match");
+              if (newPassword.length < 6) return toast.error("Min 6 characters");
+              const { error } = await supabase.auth.updateUser({ password: newPassword });
+              if (error) toast.error(error.message);
+              else { toast.success("Password updated!"); setNewPassword(""); setConfirmPw(""); }
+            }} className="w-full py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2"
+              style={{ background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,42%))" }}>
+              <KeyRound className="w-4 h-4" /> Update Password
+            </button>
+          </SCard>
+
+          <SCard title="Sign Out" icon={LogOut} accent="hsl(215,15%,45%)">
+            <p className="text-xs" style={{ color: "hsl(215,15%,40%)" }}>Sign out of TradinStar on this device.</p>
+            <button onClick={async () => { await signOut(); navigate("/auth"); }}
+              className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:opacity-80"
+              style={{ background: "hsl(222,20%,14%)", border: "1px solid hsl(222,18%,20%)", color: "hsl(215,15%,55%)" }}>
+              <LogOut className="w-4 h-4" /> Sign Out
+            </button>
+          </SCard>
+
+          <div className="rounded-2xl overflow-hidden" style={{
+            background: "hsl(0,72%,58%,0.05)", border: "1px solid hsl(0,72%,58%,0.2)",
+            boxShadow: "0 4px 20px hsl(222,40%,4%,0.5)"
+          }}>
+            <div className="px-5 py-4 flex items-center gap-3" style={{ borderBottom: "1px solid hsl(0,72%,58%,0.15)" }}>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "hsl(0,72%,58%,0.12)" }}>
+                <AlertTriangle className="w-4 h-4" style={{ color: "hsl(0,72%,65%)" }} />
               </div>
-              <p className="font-semibold text-slate-800 text-sm">Change Email</p>
+              <p className="font-bold text-sm" style={{ color: "hsl(0,72%,65%)" }}>Danger Zone</p>
             </div>
             <div className="p-5 space-y-3">
-              <p className="text-xs text-slate-400">Current: <span className="text-slate-600 font-medium">{user?.email}</span></p>
-              <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="New email address" className={inputClass} />
-              <button onClick={handleChangeEmail}
-                className="w-full text-white rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 transition-all"
-                style={{ background: "hsl(222,60%,20%)" }}>
-                <Mail className="w-4 h-4" /> Update Email
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden mb-4" style={{ boxShadow: "0 1px 4px hsl(220,14%,10%,0.07)" }}>
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
-                <KeyRound className="w-4 h-4 text-slate-500" />
-              </div>
-              <p className="font-semibold text-slate-800 text-sm">Change Password</p>
-            </div>
-            <div className="p-5 space-y-3">
-              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password (min 6 chars)" className={inputClass} />
-              <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm new password" className={inputClass} />
-              <button onClick={handleChangePassword}
-                className="w-full text-white rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 transition-all"
-                style={{ background: "hsl(222,60%,20%)" }}>
-                <KeyRound className="w-4 h-4" /> Update Password
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden mb-4" style={{ boxShadow: "0 1px 4px hsl(220,14%,10%,0.07)" }}>
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
-                <LogOut className="w-4 h-4 text-slate-500" />
-              </div>
-              <p className="font-semibold text-slate-800 text-sm">Sign Out</p>
-            </div>
-            <div className="p-5">
-              <p className="text-xs text-slate-400 mb-3">Sign out of your TradinStar account on this device.</p>
-              <button onClick={handleLogout}
-                className="w-full border border-slate-200 text-slate-700 hover:bg-red-50 hover:border-red-200 hover:text-red-600 rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 transition-all">
-                <LogOut className="w-4 h-4" /> Sign Out
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-red-100 overflow-hidden" style={{ boxShadow: "0 1px 4px hsl(0,72%,51%,0.07)" }}>
-            <div className="px-5 py-4 border-b border-red-100 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center">
-                <AlertTriangle className="w-4 h-4 text-red-500" />
-              </div>
-              <p className="font-semibold text-red-600 text-sm">Danger Zone</p>
-            </div>
-            <div className="p-5 space-y-3">
-              <p className="text-xs text-slate-500 leading-relaxed">Deleting your account is permanent. All your trades, journal entries, and data will be erased and cannot be recovered.</p>
-              <input value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder='Type "DELETE" to confirm' className={`${inputClass} border-red-200 focus:border-red-400 focus:ring-red-50`} />
-              <button onClick={handleDeleteAccount}
-                className="w-full bg-red-500 hover:bg-red-600 text-white rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 transition-all">
+              <p className="text-xs leading-relaxed" style={{ color: "hsl(215,15%,42%)" }}>
+                Deleting your account is permanent. All trades, journal entries, and data will be erased and cannot be recovered.
+              </p>
+              <input value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)}
+                placeholder='Type "DELETE" to confirm' style={{ ...INPUT, borderColor: "hsl(0,72%,58%,0.3)" }} />
+              <button onClick={() => {
+                if (deleteConfirm !== "DELETE") return toast.error('Type "DELETE" to confirm');
+                toast.error("Contact support@tradinstar.com to delete your account.");
+                setDeleteConfirm("");
+              }} className="w-full py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2"
+                style={{ background: "hsl(0,72%,52%)" }}>
                 <Trash2 className="w-4 h-4" /> Delete My Account
               </button>
             </div>
@@ -497,17 +616,22 @@ export default function Settings() {
         </>
       )}
 
-      {/* Save button — shown on all tabs except security */}
+      {/* Save button */}
       {active !== "security" && (
-        <button onClick={handleSave} disabled={saving}
-          className="w-full text-white rounded-2xl py-4 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 mt-2"
-          style={{ background: "hsl(222,60%,20%)", boxShadow: "0 4px 14px hsl(222,60%,20%,0.25)" }}>
-          {saving ? (
-            <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</>
-          ) : (
-            <><Save className="w-4 h-4" /> Save Changes</>
-          )}
-        </button>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <button onClick={handleSave} disabled={saving}
+            className="w-full text-white rounded-2xl py-4 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 mt-2"
+            style={{
+              background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,40%))",
+              boxShadow: "0 6px 24px hsl(217,92%,60%,0.35)",
+            }}>
+            {saving ? (
+              <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</>
+            ) : (
+              <><Save className="w-4 h-4" /> Save Changes</>
+            )}
+          </button>
+        </motion.div>
       )}
     </div>
   );

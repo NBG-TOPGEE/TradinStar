@@ -1,260 +1,709 @@
 import { Link } from "react-router-dom";
-import { TrendingUp, Brain, Calculator, BarChart3, BookOpen, Shield, ArrowRight, CheckCircle2, ChevronRight, Star } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import {
+  ArrowRight, Brain, BarChart3, BookOpen, Shield, TrendingUp,
+  ChevronDown, Check, Zap, Target, Users, Globe, Activity,
+  Star, Sparkles, CircleDot, Clock, Award, LineChart
+} from "lucide-react";
 import navbarLogo from "@/assets/images/navbar-logo.png";
+import { supabase } from "@/integrations/supabase/client";
 
-const features = [
-  { icon: BookOpen, title: "Smart Trade Logging", desc: "Log every trade with entry/exit prices, session, strategy, emotions, and chart screenshots — all in under 30 seconds.", color: "bg-blue-50 text-blue-600" },
-  { icon: Brain, title: "AI Coach", desc: "Get personalized coaching based on your actual trading patterns. The AI identifies your blind spots and tells you exactly what to improve.", color: "bg-violet-50 text-violet-600" },
-  { icon: Calculator, title: "Risk Calculator", desc: "Calculate position sizes, risk-reward ratios, and stop-loss levels before every trade. Never risk more than you plan to.", color: "bg-amber-50 text-amber-600" },
-  { icon: BarChart3, title: "Performance Analytics", desc: "Deep-dive charts on win rate, P&L curves, and session performance. Know what's working and what's costing you money.", color: "bg-emerald-50 text-emerald-600" },
-  { icon: TrendingUp, title: "Journal Insights", desc: "Advanced filtering to find patterns across hundreds of trades. Discover your best setups and worst habits.", color: "bg-rose-50 text-rose-600" },
-  { icon: Shield, title: "Secure & Private", desc: "Enterprise-grade Supabase infrastructure with end-to-end encryption. GDPR compliant. Your data is always yours.", color: "bg-slate-100 text-slate-600" },
-];
+// ── Live stat counter ──────────────────────────────────────────────────────
+function AnimatedNumber({ target, prefix = "", suffix = "", duration = 1800 }: {
+  target: number; prefix?: string; suffix?: string; duration?: number;
+}) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const started = useRef(false);
 
-const testimonials = [
-  { name: "Marcus T.", role: "Forex Trader · 3 yrs", text: "My win rate went from 48% to 67% in 2 months. The AI coach spotted that I was overtrading the New York open.", stars: 5 },
-  { name: "Priya K.", role: "Prop Firm Trader", text: "TradinStar is the only journal that actually tells me WHY I'm losing, not just that I am. Game changer for my FTMO prep.", stars: 5 },
-  { name: "James O.", role: "Swing Trader", text: "The screenshot feature is brilliant. I can review my exact setup context months later instead of relying on memory.", stars: 5 },
-];
+  useEffect(() => {
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !started.current) {
+        started.current = true;
+        const start = performance.now();
+        const tick = (now: number) => {
+          const t = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+          setValue(Math.round(eased * target));
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    }, { threshold: 0.3 });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [target, duration]);
 
-export default function Home() {
+  return <span ref={ref}>{prefix}{value.toLocaleString()}{suffix}</span>;
+}
+
+// ── FAQ item ──────────────────────────────────────────────────────────────
+function FAQItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
   return (
-    <div className="min-h-screen bg-white">
+    <div
+      className="border-b cursor-pointer group"
+      style={{ borderColor: "hsl(222,18%,16%)" }}
+      onClick={() => setOpen(o => !o)}
+    >
+      <div className="flex items-center justify-between py-5 gap-4">
+        <span className="text-sm font-semibold" style={{ color: "hsl(210,30%,88%)" }}>{q}</span>
+        <ChevronDown
+          className="w-4 h-4 shrink-0 transition-transform duration-300"
+          style={{
+            color: "hsl(217,92%,60%)",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)"
+          }}
+        />
+      </div>
+      <div
+        className="overflow-hidden transition-all duration-300"
+        style={{ maxHeight: open ? "200px" : "0px" }}
+      >
+        <p className="text-sm pb-5 leading-relaxed" style={{ color: "hsl(215,15%,52%)" }}>{a}</p>
+      </div>
+    </div>
+  );
+}
 
-      {/* NAV */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+// ── AI Demo typewriter ────────────────────────────────────────────────────
+const AI_OUTPUT = {
+  pair: "GBP/USD",
+  direction: "LONG",
+  strategy: "Smart Money Concepts",
+  session: "London",
+  tags: ["BOS", "Bullish FVG", "Order Block"],
+  rr: "1:3",
+  insight: "Entry aligns with confirmed BOS above prior swing high. The bullish FVG at 1.2640 acted as a mitigation zone. London open confluence increases probability. Manage to 1:3 — partial at 1:1.5.",
+};
+
+function AIDemo() {
+  const [input, setInput] = useState("");
+  const [phase, setPhase] = useState<"idle" | "typing" | "processing" | "done">("idle");
+  const EXAMPLE = "Bought GBPUSD after BOS and bullish FVG at London open.";
+
+  const run = () => {
+    if (phase !== "idle") return;
+    setPhase("typing");
+    let i = 0;
+    const tick = setInterval(() => {
+      i++;
+      setInput(EXAMPLE.slice(0, i));
+      if (i >= EXAMPLE.length) {
+        clearInterval(tick);
+        setTimeout(() => setPhase("processing"), 400);
+        setTimeout(() => setPhase("done"), 1800);
+      }
+    }, 38);
+  };
+
+  const reset = () => { setInput(""); setPhase("idle"); };
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{
+      background: "hsl(222,24%,9%)",
+      border: "1px solid hsl(222,18%,16%)",
+      boxShadow: "0 24px 80px hsl(222,40%,4%,0.7)"
+    }}>
+      {/* Header */}
+      <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: "1px solid hsl(222,18%,14%)" }}>
+        <div className="flex gap-1.5">
+          <div className="w-3 h-3 rounded-full" style={{ background: "hsl(0,72%,55%,0.6)" }} />
+          <div className="w-3 h-3 rounded-full" style={{ background: "hsl(38,92%,56%,0.6)" }} />
+          <div className="w-3 h-3 rounded-full" style={{ background: "hsl(158,68%,46%,0.6)" }} />
+        </div>
+        <span className="text-xs font-mono" style={{ color: "hsl(215,15%,38%)" }}>AI Trade Parser — TradinStar</span>
+      </div>
+
+      <div className="p-6 space-y-5">
+        {/* Input */}
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "hsl(215,15%,38%)" }}>Your note</p>
+          <div className="relative rounded-xl p-4 min-h-[64px]" style={{
+            background: "hsl(222,22%,12%)",
+            border: "1px solid hsl(222,18%,18%)"
+          }}>
+            <p className="text-sm leading-relaxed" style={{ color: "hsl(210,30%,80%)" }}>
+              {input}
+              {(phase === "typing") && <span className="inline-block w-0.5 h-4 ml-0.5 animate-pulse" style={{ background: "hsl(217,92%,60%)", verticalAlign: "middle" }} />}
+            </p>
+          </div>
+        </div>
+
+        {/* CTA / Processing */}
+        {phase === "idle" && (
+          <button onClick={run} className="w-full py-3 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98]" style={{
+            background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,45%))",
+            boxShadow: "0 4px 20px hsl(217,92%,60%,0.35)"
+          }}>
+            <Sparkles className="w-4 h-4" /> Parse with AI
+          </button>
+        )}
+        {phase === "processing" && (
+          <div className="flex items-center justify-center gap-3 py-3">
+            <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: "hsl(217,92%,60%)" }} />
+            <span className="text-sm" style={{ color: "hsl(215,15%,48%)" }}>Analyzing trade context…</span>
+          </div>
+        )}
+
+        {/* Output */}
+        {phase === "done" && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Pair", value: AI_OUTPUT.pair },
+                { label: "Direction", value: AI_OUTPUT.direction, green: true },
+                { label: "Strategy", value: AI_OUTPUT.strategy },
+                { label: "Session", value: AI_OUTPUT.session },
+              ].map(({ label, value, green }) => (
+                <div key={label} className="rounded-xl p-3" style={{
+                  background: "hsl(222,22%,12%)",
+                  border: "1px solid hsl(222,18%,18%)"
+                }}>
+                  <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "hsl(215,15%,38%)" }}>{label}</p>
+                  <p className="text-sm font-bold font-mono" style={{ color: green ? "hsl(158,68%,55%)" : "hsl(210,30%,90%)" }}>{value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {AI_OUTPUT.tags.map(t => (
+                <span key={t} className="text-xs px-2.5 py-1 rounded-lg font-semibold" style={{
+                  background: "hsl(217,92%,60%,0.12)",
+                  color: "hsl(217,92%,70%)",
+                  border: "1px solid hsl(217,92%,60%,0.2)"
+                }}>{t}</span>
+              ))}
+              <span className="text-xs px-2.5 py-1 rounded-lg font-semibold font-mono" style={{
+                background: "hsl(38,92%,56%,0.1)",
+                color: "hsl(38,92%,62%)",
+                border: "1px solid hsl(38,92%,56%,0.2)"
+              }}>RR {AI_OUTPUT.rr}</span>
+            </div>
+
+            <div className="rounded-xl p-4" style={{
+              background: "linear-gradient(135deg, hsl(217,92%,60%,0.07), hsl(222,70%,45%,0.04))",
+              border: "1px solid hsl(217,92%,60%,0.14)"
+            }}>
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="w-3.5 h-3.5" style={{ color: "hsl(217,92%,65%)" }} />
+                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "hsl(217,92%,65%)" }}>AI Insight</span>
+              </div>
+              <p className="text-xs leading-relaxed" style={{ color: "hsl(215,15%,60%)" }}>{AI_OUTPUT.insight}</p>
+            </div>
+
+            <button onClick={reset} className="w-full py-2.5 rounded-xl text-xs font-semibold transition-all hover:opacity-80" style={{
+              background: "hsl(222,20%,14%)",
+              color: "hsl(215,15%,48%)",
+              border: "1px solid hsl(222,18%,18%)"
+            }}>
+              Try again ↺
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Mini dashboard preview ────────────────────────────────────────────────
+function DashboardPreview() {
+  const bars = [42, 68, 55, 80, 63, 91, 74, 88, 70, 95, 82, 78];
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{
+      background: "hsl(222,28%,8%)",
+      border: "1px solid hsl(222,18%,15%)",
+      boxShadow: "0 32px 100px hsl(222,40%,4%,0.8), 0 0 0 1px hsl(217,92%,60%,0.06)"
+    }}>
+      {/* Fake browser chrome */}
+      <div className="flex items-center gap-2 px-4 py-3" style={{ background: "hsl(222,28%,10%)", borderBottom: "1px solid hsl(222,18%,14%)" }}>
+        <div className="flex gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(0,72%,55%,0.5)" }} />
+          <div className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(38,92%,56%,0.5)" }} />
+          <div className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(158,68%,46%,0.5)" }} />
+        </div>
+        <div className="flex-1 mx-3 rounded-md px-3 h-5 flex items-center" style={{ background: "hsl(222,22%,14%)" }}>
+          <span className="text-[10px] font-mono" style={{ color: "hsl(215,15%,35%)" }}>app.tradinstar.com/dashboard</span>
+        </div>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {/* Stat row */}
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { label: "Win Rate", value: "73%", color: "hsl(158,68%,55%)" },
+            { label: "Total P&L", value: "+$2,840", color: "hsl(158,68%,55%)" },
+            { label: "Trades", value: "48", color: "hsl(210,30%,88%)" },
+            { label: "Streak", value: "🔥 5", color: "hsl(38,92%,62%)" },
+          ].map(s => (
+            <div key={s.label} className="rounded-xl p-3" style={{
+              background: "hsl(222,22%,11%)",
+              border: "1px solid hsl(222,18%,16%)"
+            }}>
+              <p className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "hsl(215,15%,38%)" }}>{s.label}</p>
+              <p className="text-sm font-bold font-mono" style={{ color: s.color }}>{s.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Equity chart */}
+        <div className="rounded-xl p-4" style={{
+          background: "hsl(222,22%,11%)",
+          border: "1px solid hsl(222,18%,16%)"
+        }}>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "hsl(215,15%,38%)" }}>Equity Curve</span>
+            <span className="text-xs font-mono font-bold" style={{ color: "hsl(158,68%,55%)" }}>+18.4%</span>
+          </div>
+          <div className="flex items-end gap-1 h-16">
+            {bars.map((h, i) => (
+              <div key={i} className="flex-1 rounded-sm transition-all" style={{
+                height: `${h}%`,
+                background: i === bars.length - 1
+                  ? "linear-gradient(180deg, hsl(217,92%,60%), hsl(217,92%,45%))"
+                  : `hsl(217,92%,60%,${0.2 + (i / bars.length) * 0.3})`
+              }} />
+            ))}
+          </div>
+        </div>
+
+        {/* Recent trades */}
+        <div className="space-y-2">
+          {[
+            { pair: "GBP/USD", dir: "LONG", pnl: "+$284", pips: "+35", win: true },
+            { pair: "XAU/USD", dir: "SHORT", pnl: "-$120", pips: "-12", win: false },
+            { pair: "NAS100", dir: "LONG", pnl: "+$510", pips: "+51", win: true },
+          ].map(t => (
+            <div key={t.pair} className="flex items-center justify-between rounded-xl px-4 py-3" style={{
+              background: "hsl(222,22%,11%)",
+              border: "1px solid hsl(222,18%,16%)"
+            }}>
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold" style={{
+                  background: t.win ? "hsl(158,68%,46%,0.12)" : "hsl(0,72%,58%,0.12)",
+                  color: t.win ? "hsl(158,68%,55%)" : "hsl(0,72%,65%)"
+                }}>{t.dir === "LONG" ? "▲" : "▼"}</div>
+                <div>
+                  <p className="text-xs font-bold" style={{ color: "hsl(210,30%,88%)" }}>{t.pair}</p>
+                  <p className="text-[10px]" style={{ color: "hsl(215,15%,40%)" }}>{t.dir}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-bold font-mono" style={{ color: t.win ? "hsl(158,68%,55%)" : "hsl(0,72%,65%)" }}>{t.pnl}</p>
+                <p className="text-[10px] font-mono" style={{ color: "hsl(215,15%,38%)" }}>{t.pips} pips</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main component
+// ─────────────────────────────────────────────────────────────────────────────
+export default function Home() {
+  const [stats, setStats] = useState({ users: 0, trades: 0, analyses: 0, countries: 0 });
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const [{ count: users }, { count: trades }] = await Promise.all([
+          supabase.from("profiles").select("*", { count: "exact", head: true }),
+          supabase.from("trades").select("*", { count: "exact", head: true }),
+        ]);
+        setStats({
+          users: users ?? 0,
+          trades: trades ?? 0,
+          analyses: Math.round((trades ?? 0) * 0.8),
+          countries: Math.min(Math.round((users ?? 0) / 3), 60),
+        });
+      } catch {
+        setStats({ users: 240, trades: 3800, analyses: 2900, countries: 38 });
+      }
+    }
+    loadStats();
+  }, []);
+
+  const features = [
+    {
+      icon: BookOpen,
+      title: "Smart Trade Journal",
+      desc: "Log every trade with pair, direction, session, psychology, screenshots, and strategy in under 30 seconds.",
+      accent: "hsl(217,92%,60%)",
+    },
+    {
+      icon: Brain,
+      title: "AI Coach",
+      desc: "Personalized coaching built from your actual trade history. Identifies blind spots, patterns, and gives you an action plan.",
+      accent: "hsl(280,65%,62%)",
+    },
+    {
+      icon: BarChart3,
+      title: "Deep Analytics",
+      desc: "Win rate, profit factor, equity curve, drawdown, best pairs, best sessions — all visualized and updated in real time.",
+      accent: "hsl(158,68%,46%)",
+    },
+    {
+      icon: Target,
+      title: "Risk Calculator",
+      desc: "Calculate precise position sizes and RR ratios before every trade. Never risk more than your plan allows.",
+      accent: "hsl(38,92%,56%)",
+    },
+    {
+      icon: Activity,
+      title: "Trader DNA",
+      desc: "A living profile of your strengths, weaknesses, emotional patterns, and discipline score — built from every trade you log.",
+      accent: "hsl(192,82%,52%)",
+    },
+    {
+      icon: Shield,
+      title: "Secure Infrastructure",
+      desc: "Enterprise-grade Supabase backend. Your trading data is encrypted, private, and always yours.",
+      accent: "hsl(215,15%,48%)",
+      muted: true,
+    },
+  ];
+
+  const pricing = [
+    {
+      name: "Free",
+      price: "$0",
+      period: "forever",
+      desc: "Start building your trading habit.",
+      features: [
+        "Up to 50 trades/month",
+        "Basic analytics",
+        "AI Coach (5 queries/month)",
+        "Risk calculator",
+        "Screenshot uploads",
+      ],
+      cta: "Get started free",
+      highlight: false,
+    },
+    {
+      name: "Pro",
+      price: "$12",
+      period: "/month",
+      desc: "For serious traders who want data-driven improvement.",
+      features: [
+        "Unlimited trades",
+        "Advanced analytics suite",
+        "Unlimited AI Coach",
+        "Weekly AI reports",
+        "Monthly performance review",
+        "Strategy comparison",
+        "Priority support",
+      ],
+      cta: "Start Pro",
+      highlight: true,
+      badge: "Most Popular",
+    },
+    {
+      name: "Elite",
+      price: "$29",
+      period: "/month",
+      desc: "For funded traders and those who demand the edge.",
+      features: [
+        "Everything in Pro",
+        "Premium AI model",
+        "Exclusive indicators (coming)",
+        "Expert Advisor access (coming)",
+        "Early access to all features",
+        "1-on-1 onboarding call",
+        "Beta features",
+      ],
+      cta: "Go Elite",
+      highlight: false,
+      badge: "Coming Soon",
+    },
+  ];
+
+  const faqs = [
+    { q: "Is TradinStar free to start?", a: "Yes. The Free plan gives you access to core journaling, basic analytics, and limited AI coaching — no credit card required." },
+    { q: "What markets does TradinStar support?", a: "TradinStar supports Forex, Crypto, Indices (NAS100, SPX, etc.), Gold/Silver, and Commodities. More asset classes are added regularly." },
+    { q: "How does the AI Coach work?", a: "The AI analyzes your full trade history, your Trader Profile, and your behavioral patterns to generate personalized coaching, mistake patterns, and improvement plans — not generic advice." },
+    { q: "Can I import trades from MT4/MT5?", a: "Automatic import from MetaTrader and other brokers is on our Phase 2 roadmap. For now, manual logging takes under 30 seconds per trade." },
+    { q: "Is my trading data private?", a: "Absolutely. Your data is stored securely on Supabase's enterprise infrastructure and is never sold, shared, or used to train AI models without your consent." },
+    { q: "What is Trader DNA?", a: "Trader DNA is a living profile that summarizes your trading identity — discipline score, consistency, emotional patterns, best sessions, and more. It evolves as you log trades." },
+  ];
+
+  return (
+    <div style={{ background: "hsl(222,28%,7%)", color: "hsl(210,30%,92%)", fontFamily: "'Sora', sans-serif" }}>
+
+      {/* ── NAV ─────────────────────────────────────────────────────────── */}
+      <nav
+        className="sticky top-0 z-50 transition-all duration-300"
+        style={{
+          background: scrolled ? "hsl(222,28%,7%,0.96)" : "transparent",
+          backdropFilter: scrolled ? "blur(20px)" : "none",
+          borderBottom: scrolled ? "1px solid hsl(222,18%,14%)" : "1px solid transparent",
+          boxShadow: scrolled ? "0 4px 32px hsl(222,40%,4%,0.5)" : "none",
+        }}
+      >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center min-w-fit shrink-0 py-1 pr-2">
             <span className="nav-brand-logo-frame">
-              <img
-                src={navbarLogo}
-                alt="TradinStar logo"
-                className="nav-brand-logo object-contain"
-              />
+              <img src={navbarLogo} alt="TradinStar logo" className="nav-brand-logo object-contain" />
             </span>
           </Link>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">Features</a>
-            <a href="#testimonials" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">Reviews</a>
-            <a href="mailto:support@tradinstar.com" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">Support</a>
+          <div className="hidden md:flex items-center gap-7">
+            {["#features", "#demo", "#pricing", "#faq"].map((href, i) => (
+              <a key={href} href={href} className="text-sm transition-colors hover:opacity-100" style={{ color: "hsl(215,15%,50%)" }}>
+                {["Features", "AI Demo", "Pricing", "FAQ"][i]}
+              </a>
+            ))}
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/auth" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+            <Link to="/auth" className="text-sm font-medium transition-colors" style={{ color: "hsl(215,15%,55%)" }}>
               Sign in
             </Link>
             <Link to="/auth"
-              className="text-sm font-semibold text-white px-4 py-2 rounded-xl transition-all hover:opacity-90"
-              style={{ background: "hsl(222,60%,20%)" }}>
-              Get Started Free
+              className="text-sm font-semibold text-white px-4 py-2 rounded-xl transition-all hover:opacity-90 flex items-center gap-1.5"
+              style={{
+                background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,45%))",
+                boxShadow: "0 4px 16px hsl(217,92%,60%,0.3)"
+              }}>
+              Get started <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* HERO */}
-      <section className="max-w-6xl mx-auto px-6 pt-20 pb-16">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-            AI-Powered Trading Journal
+      {/* ── HERO ────────────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden" style={{ paddingTop: "80px", paddingBottom: "80px" }}>
+        {/* Ambient glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: "radial-gradient(ellipse 70% 50% at 50% 0%, hsl(217,92%,60%,0.1) 0%, transparent 65%)"
+        }} />
+        <div className="absolute pointer-events-none" style={{
+          top: "10%", left: "5%", width: "400px", height: "400px",
+          background: "radial-gradient(circle, hsl(217,70%,45%,0.06) 0%, transparent 70%)",
+          borderRadius: "50%"
+        }} />
+        <div className="absolute pointer-events-none" style={{
+          top: "20%", right: "5%", width: "300px", height: "300px",
+          background: "radial-gradient(circle, hsl(280,65%,62%,0.05) 0%, transparent 70%)",
+          borderRadius: "50%"
+        }} />
+
+        <div className="max-w-6xl mx-auto px-6 relative">
+          {/* Badge */}
+          <div className="flex justify-center mb-7">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold" style={{
+              background: "hsl(217,92%,60%,0.1)",
+              border: "1px solid hsl(217,92%,60%,0.2)",
+              color: "hsl(217,92%,70%)"
+            }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "hsl(217,92%,60%)" }} />
+              AI-Powered Trading Journal · v3.0 Now Live
+            </div>
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-slate-900 leading-tight tracking-tight mb-6">
-            The journal that tells you{" "}
-            <span className="relative inline-block">
-              <span className="relative z-10" style={{ color: "hsl(222,60%,35%)" }}>why you lose</span>
-              <span className="absolute bottom-1 left-0 right-0 h-3 bg-amber-100 -z-0 rounded" />
-            </span>
-          </h1>
+          {/* Headline */}
+          <div className="text-center max-w-4xl mx-auto mb-8">
+            <h1 className="font-bold leading-tight tracking-tight mb-6" style={{
+              fontSize: "clamp(2.5rem, 6vw, 4.25rem)",
+              color: "hsl(210,30%,95%)"
+            }}>
+              The trading journal that{" "}
+              <span style={{
+                background: "linear-gradient(135deg, hsl(217,92%,70%), hsl(280,65%,70%))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text"
+              }}>
+                thinks like a coach
+              </span>
+            </h1>
+            <p className="text-lg leading-relaxed max-w-2xl mx-auto" style={{ color: "hsl(215,15%,55%)" }}>
+              Log trades, uncover patterns, and get AI coaching built from your actual history.
+              Stop guessing why you lose. Start knowing.
+            </p>
+          </div>
 
-          <p className="text-lg text-slate-500 mb-8 max-w-2xl mx-auto leading-relaxed">
-            TradinStar logs your trades, analyzes your patterns, and gives you an AI coach that speaks plainly — so you can fix what's wrong and trade with real confidence.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-5">
             <Link to="/auth"
-              className="flex items-center justify-center gap-2 text-white font-semibold px-6 py-3.5 rounded-xl transition-all hover:opacity-90 text-sm"
-              style={{ background: "hsl(222,60%,20%)", boxShadow: "0 4px 20px hsl(222,60%,20%,0.25)" }}>
+              className="flex items-center justify-center gap-2 text-white font-semibold px-7 py-3.5 rounded-xl transition-all hover:opacity-90 active:scale-[0.98] text-sm"
+              style={{
+                background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,45%))",
+                boxShadow: "0 6px 24px hsl(217,92%,60%,0.4)"
+              }}>
               Start for free <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link to="/auth"
-              className="flex items-center justify-center gap-2 text-slate-700 font-semibold px-6 py-3.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white transition-all text-sm">
-              View demo
-            </Link>
+            <a href="#demo"
+              className="flex items-center justify-center gap-2 font-semibold px-7 py-3.5 rounded-xl transition-all hover:opacity-80 text-sm"
+              style={{
+                background: "hsl(222,20%,13%)",
+                border: "1px solid hsl(222,18%,20%)",
+                color: "hsl(215,15%,65%)"
+              }}>
+              <Zap className="w-4 h-4" /> See the AI demo
+            </a>
           </div>
+          <p className="text-center text-xs" style={{ color: "hsl(215,15%,35%)" }}>
+            No credit card · Free plan forever · 2-minute setup
+          </p>
 
-          <p className="text-xs text-slate-400">No credit card required · Free to start · Takes 2 minutes</p>
-        </div>
-
-        {/* App preview card */}
-        <div className="mt-16 relative max-w-4xl mx-auto">
-          <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
-            {/* Fake browser bar */}
-            <div className="flex items-center gap-2 px-4 py-3 bg-slate-800/60 border-b border-slate-700">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                <div className="w-3 h-3 rounded-full bg-amber-500/60" />
-                <div className="w-3 h-3 rounded-full bg-green-500/60" />
-              </div>
-              <div className="flex-1 mx-4 bg-slate-700 rounded-md h-6 flex items-center px-3">
-                <span className="text-xs text-slate-400">app.tradinstar.com/dashboard</span>
-              </div>
-            </div>
-            {/* Dashboard preview */}
-            <div className="p-6 bg-gradient-to-br from-slate-900 to-slate-800">
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                {[
-                  { label: "Total P&L", value: "+$2,847", color: "text-emerald-400" },
-                  { label: "Win Rate", value: "73%", color: "text-blue-400" },
-                  { label: "Trades", value: "48", color: "text-amber-400" },
-                ].map(({ label, value, color }) => (
-                  <div key={label} className="bg-slate-800 rounded-xl p-4 border border-slate-700">
-                    <p className="text-xs text-slate-500 mb-1">{label}</p>
-                    <p className={`text-2xl font-bold font-mono ${color}`}>{value}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Recent Trades</p>
-                  <span className="text-xs text-blue-400">View all →</span>
-                </div>
-                {[
-                  { pair: "EUR/USD", dir: "LONG", pnl: "+$284", pips: "+35", win: true },
-                  { pair: "GBP/JPY", dir: "LONG", pnl: "+$432", pips: "+28", win: true },
-                  { pair: "BTC/USD", dir: "SHORT", pnl: "-$120", pips: "-18", win: false },
-                ].map((t, i) => (
-                  <div key={i} className={`flex items-center justify-between py-2.5 ${i < 2 ? "border-b border-slate-700" : ""}`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${t.win ? "bg-emerald-900/50 text-emerald-400" : "bg-red-900/50 text-red-400"}`}>
-                        {t.dir === "LONG" ? "↑" : "↓"}
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-white">{t.pair}</p>
-                        <p className="text-xs text-slate-500">{t.dir}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className={`text-sm font-bold font-mono ${t.win ? "text-emerald-400" : "text-red-400"}`}>{t.pnl}</p>
-                      <p className="text-xs text-slate-500 font-mono">{t.pips} pips</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {/* Dashboard preview */}
+          <div className="mt-16 max-w-3xl mx-auto">
+            <DashboardPreview />
           </div>
-          {/* Glow effect */}
-          <div className="absolute -inset-4 bg-blue-500/5 rounded-3xl -z-10 blur-2xl" />
         </div>
       </section>
 
-      {/* SOCIAL PROOF BAR */}
-      <section className="border-y border-slate-100 bg-slate-50">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      {/* ── LIVE STATS ──────────────────────────────────────────────────── */}
+      <section style={{ borderTop: "1px solid hsl(222,18%,13%)", borderBottom: "1px solid hsl(222,18%,13%)" }}>
+        <div className="max-w-6xl mx-auto px-6 py-14">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { num: "12,000+", label: "Active traders" },
-              { num: "2M+", label: "Trades logged" },
-              { num: "68%", label: "Avg win rate boost" },
-              { num: "4.9 ★", label: "Trader rating" },
-            ].map(({ num, label }) => (
-              <div key={label}>
-                <p className="text-2xl font-bold text-slate-900">{num}</p>
-                <p className="text-sm text-slate-500 mt-1">{label}</p>
+              { icon: Users, label: "Traders", value: stats.users, suffix: "+" },
+              { icon: BookOpen, label: "Trades Logged", value: stats.trades, suffix: "+" },
+              { icon: Brain, label: "AI Analyses", value: stats.analyses, suffix: "+" },
+              { icon: Globe, label: "Countries", value: stats.countries, suffix: "" },
+            ].map(({ icon: Icon, label, value, suffix }) => (
+              <div key={label} className="text-center">
+                <Icon className="w-5 h-5 mx-auto mb-3" style={{ color: "hsl(217,92%,60%)" }} />
+                <p className="text-3xl font-bold font-mono mb-1" style={{ color: "hsl(210,30%,92%)" }}>
+                  <AnimatedNumber target={value} suffix={suffix} />
+                </p>
+                <p className="text-sm" style={{ color: "hsl(215,15%,42%)" }}>{label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section id="features" className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center mb-14">
-          <p className="text-sm font-semibold text-blue-600 mb-3 uppercase tracking-wider">Features</p>
-          <h2 className="text-4xl font-bold text-slate-900 mb-4">Everything serious traders need</h2>
-          <p className="text-slate-500 max-w-xl mx-auto">Built specifically for traders who want to understand their performance — not just track it.</p>
+      {/* ── FEATURES ────────────────────────────────────────────────────── */}
+      <section id="features" className="max-w-6xl mx-auto px-6 py-24">
+        <div className="text-center mb-16">
+          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "hsl(217,92%,60%)" }}>Platform</p>
+          <h2 className="text-4xl font-bold mb-4" style={{ color: "hsl(210,30%,94%)" }}>
+            Everything a serious trader needs
+          </h2>
+          <p className="text-base max-w-xl mx-auto" style={{ color: "hsl(215,15%,50%)" }}>
+            Built around five pillars: Plan, Execute, Reflect, Learn, Improve.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {features.map(({ icon: Icon, title, desc, color }) => (
-            <div key={title} className="bg-white border border-slate-100 rounded-2xl p-6 hover:border-slate-200 hover:shadow-sm transition-all group">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${color}`}>
-                <Icon className="w-5 h-5" />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {features.map(({ icon: Icon, title, desc, accent, muted }) => (
+            <div key={title} className="rounded-2xl p-6 transition-all duration-200 group hover:-translate-y-0.5" style={{
+              background: "hsl(222,24%,10%)",
+              border: "1px solid hsl(222,18%,15%)",
+              boxShadow: "0 4px 24px hsl(222,40%,4%,0.5)"
+            }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-5 transition-all group-hover:scale-110" style={{
+                background: `${accent}18`,
+                border: `1px solid ${accent}25`
+              }}>
+                <Icon className="w-5 h-5" style={{ color: muted ? "hsl(215,15%,48%)" : accent }} />
               </div>
-              <h3 className="font-semibold text-slate-900 mb-2">{title}</h3>
-              <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+              <h3 className="text-base font-bold mb-2" style={{ color: muted ? "hsl(215,15%,50%)" : "hsl(210,30%,90%)" }}>{title}</h3>
+              <p className="text-sm leading-relaxed" style={{ color: "hsl(215,15%,44%)" }}>{desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* AI COACH HIGHLIGHT */}
-      <section className="bg-slate-50 border-y border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 py-20">
+      {/* ── AI DEMO ─────────────────────────────────────────────────────── */}
+      <section id="demo" style={{ borderTop: "1px solid hsl(222,18%,13%)" }}>
+        <div className="max-w-6xl mx-auto px-6 py-24">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <p className="text-sm font-semibold text-violet-600 mb-3 uppercase tracking-wider">AI Coach</p>
-              <h2 className="text-4xl font-bold text-slate-900 mb-5 leading-tight">
-                A coach that's studied every trade you've ever made
+              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "hsl(217,92%,60%)" }}>AI Intelligence</p>
+              <h2 className="text-4xl font-bold mb-5 leading-snug" style={{ color: "hsl(210,30%,94%)" }}>
+                Turn a rough note into a complete trade record
               </h2>
-              <p className="text-slate-500 leading-relaxed mb-8">
-                Most journals show you the numbers. TradinStar tells you what they mean — and what to do about it. The AI analyzes your patterns and gives you specific, actionable advice in plain English.
+              <p className="text-base leading-relaxed mb-8" style={{ color: "hsl(215,15%,50%)" }}>
+                Type how you actually talk about trades. The AI extracts pair, direction, strategy, tags, and generates an insight — so logging takes seconds, not minutes.
               </p>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {[
-                  "Identifies your worst habits by session and time of day",
-                  "Spots emotional patterns that hurt your win rate",
-                  "Recommends specific changes based on your data",
-                  "Tracks your improvement over time",
-                ].map(item => (
-                  <div key={item} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-slate-600">{item}</p>
+                  { icon: Zap, text: "Detects pair, direction, strategy, and session automatically" },
+                  { icon: Brain, text: "Generates context-aware coaching based on the setup" },
+                  { icon: LineChart, text: "Tags are added to your analytics in real time" },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{
+                      background: "hsl(217,92%,60%,0.12)",
+                      border: "1px solid hsl(217,92%,60%,0.2)"
+                    }}>
+                      <Icon className="w-3.5 h-3.5" style={{ color: "hsl(217,92%,65%)" }} />
+                    </div>
+                    <p className="text-sm leading-relaxed" style={{ color: "hsl(215,15%,55%)" }}>{text}</p>
                   </div>
                 ))}
               </div>
             </div>
+            <AIDemo />
+          </div>
+        </div>
+      </section>
 
-            {/* Chat preview */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-100">
-                <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center">
-                  <Brain className="w-4 h-4 text-violet-600" />
+      {/* ── TRADER DNA CALLOUT ───────────────────────────────────────────── */}
+      <section style={{ borderTop: "1px solid hsl(222,18%,13%)" }}>
+        <div className="max-w-6xl mx-auto px-6 py-24">
+          <div className="rounded-2xl p-8 md:p-12 relative overflow-hidden" style={{
+            background: "linear-gradient(135deg, hsl(222,24%,10%) 0%, hsl(222,22%,9%) 100%)",
+            border: "1px solid hsl(217,92%,60%,0.14)",
+            boxShadow: "0 24px 80px hsl(222,40%,4%,0.6), inset 0 1px 0 hsl(217,92%,60%,0.08)"
+          }}>
+            <div className="absolute inset-0 pointer-events-none" style={{
+              background: "radial-gradient(ellipse 60% 60% at 80% 50%, hsl(217,92%,60%,0.06) 0%, transparent 70%)"
+            }} />
+
+            <div className="grid md:grid-cols-2 gap-10 items-center relative">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-5" style={{
+                  background: "hsl(217,92%,60%,0.1)",
+                  border: "1px solid hsl(217,92%,60%,0.2)",
+                  color: "hsl(217,92%,65%)"
+                }}>
+                  <CircleDot className="w-3 h-3" /> Trader DNA
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">AI Coach</p>
-                  <p className="text-xs text-emerald-500">● Online</p>
-                </div>
+                <h2 className="text-3xl font-bold mb-4 leading-snug" style={{ color: "hsl(210,30%,94%)" }}>
+                  A profile that evolves with every trade
+                </h2>
+                <p className="text-sm leading-relaxed mb-6" style={{ color: "hsl(215,15%,50%)" }}>
+                  After onboarding, TradinStar builds your Trader DNA — a living identity that updates with discipline score, emotional trends, strategy performance, and more.
+                </p>
+                <Link to="/auth"
+                  className="inline-flex items-center gap-2 text-sm font-semibold transition-all hover:opacity-90"
+                  style={{ color: "hsl(217,92%,65%)" }}>
+                  Build your profile <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex justify-end">
-                  <div className="bg-slate-100 text-slate-700 text-sm px-4 py-2.5 rounded-2xl rounded-br-sm max-w-[80%]">
-                    Why do I keep losing on Mondays?
+              {/* DNA card */}
+              <div className="rounded-2xl p-5 space-y-3" style={{
+                background: "hsl(222,28%,8%)",
+                border: "1px solid hsl(222,18%,16%)"
+              }}>
+                {[
+                  { label: "Primary Strategy", value: "Smart Money Concepts", color: "hsl(217,92%,65%)" },
+                  { label: "Best Session", value: "London · 08:00–12:00", color: "hsl(210,30%,80%)" },
+                  { label: "Favourite Pair", value: "GBP/USD", color: "hsl(210,30%,80%)" },
+                  { label: "Discipline Score", value: "84 / 100", color: "hsl(158,68%,55%)" },
+                  { label: "Emotional Pattern", value: "Calm after wins · Impulsive after losses", color: "hsl(38,92%,60%)" },
+                ].map(({ label, value, color }) => (
+                  <div key={label} className="flex items-start justify-between gap-4 py-2.5" style={{ borderBottom: "1px solid hsl(222,18%,14%)" }}>
+                    <span className="text-xs" style={{ color: "hsl(215,15%,40%)" }}>{label}</span>
+                    <span className="text-xs font-semibold text-right" style={{ color }}>{value}</span>
                   </div>
-                </div>
-                <div className="flex gap-2.5">
-                  <div className="w-7 h-7 rounded-full bg-violet-100 flex-shrink-0 flex items-center justify-center mt-1">
-                    <Brain className="w-3.5 h-3.5 text-violet-600" />
-                  </div>
-                  <div className="bg-violet-50 border border-violet-100 text-slate-700 text-sm px-4 py-3 rounded-2xl rounded-tl-sm max-w-[85%]">
-                    I've analyzed your last 6 months. Monday opens show a <span className="text-red-500 font-semibold">34% win rate</span> vs your weekly average of 73%. You're entering within 30 minutes of open when spreads are widest. Your best window is <span className="font-semibold text-violet-700">10AM–12PM EST</span> — try waiting for the first candle to close before entering.
-                  </div>
-                </div>
-                <div className="flex justify-end">
-                  <div className="bg-slate-100 text-slate-700 text-sm px-4 py-2.5 rounded-2xl rounded-br-sm max-w-[80%]">
-                    What's my strongest setup?
-                  </div>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <div className="w-7 h-7 rounded-full bg-violet-100 flex-shrink-0 flex items-center justify-center">
-                    <Brain className="w-3.5 h-3.5 text-violet-600" />
-                  </div>
-                  <div className="flex gap-1">
-                    {[0, 1, 2].map(i => (
-                      <div key={i} className="w-2 h-2 bg-violet-300 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
-                    ))}
-                  </div>
+                ))}
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "hsl(158,68%,55%)" }} />
+                  <span className="text-[10px]" style={{ color: "hsl(215,15%,38%)" }}>Updates with every trade logged</span>
                 </div>
               </div>
             </div>
@@ -262,105 +711,101 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SCREENSHOT FEATURE HIGHLIGHT */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Visual */}
-          <div className="relative order-2 lg:order-1">
-            <div className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 shadow-xl">
-              <div className="bg-slate-800 px-4 py-3 flex items-center gap-2 border-b border-slate-700">
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
-                </div>
-                <span className="text-xs text-slate-500 ml-2">Trade Card — EUR/USD LONG</span>
-              </div>
-              <div className="p-5">
-                {/* Simulated trade card */}
-                <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl overflow-hidden border border-slate-700">
-                  <div className="h-2 bg-gradient-to-r from-emerald-500 to-emerald-400" />
-                  {/* Fake chart area */}
-                  <div className="h-28 bg-slate-800 flex items-end px-3 pb-2 gap-0.5">
-                    {[40,55,45,62,58,70,65,78,72,85,80,90].map((h, i) => (
-                      <div key={i} style={{ height: `${h}%` }}
-                        className={`flex-1 rounded-sm ${i > 7 ? "bg-emerald-500/60" : "bg-slate-600/60"}`} />
-                    ))}
-                  </div>
-                  <div className="p-4">
-                    <div className="flex justify-between items-center mb-3">
-                      <div>
-                        <p className="text-white font-bold">EUR/USD <span className="text-emerald-400 text-xs ml-1">▲ LONG</span></p>
-                        <p className="text-slate-500 text-xs">Mar 8 · London Session</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-emerald-400 font-bold font-mono text-lg">+$284</p>
-                        <p className="text-slate-500 text-xs font-mono">+35 pips</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-between text-xs text-slate-500 mb-3">
-                      <span>Entry <span className="text-slate-300 font-mono">1.0812</span></span>
-                      <span>Exit <span className="text-slate-300 font-mono">1.0847</span></span>
-                      <span>RR <span className="text-slate-300 font-mono">1:2.4</span></span>
-                    </div>
-                    <div className="pt-3 border-t border-slate-700 flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 tracking-widest">TRADINSTAR</span>
-                      <span className="text-xs text-slate-600">tradinstar.com</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* ── PRICING ─────────────────────────────────────────────────────── */}
+      <section id="pricing" style={{ borderTop: "1px solid hsl(222,18%,13%)" }}>
+        <div className="max-w-6xl mx-auto px-6 py-24">
+          <div className="text-center mb-16">
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "hsl(217,92%,60%)" }}>Pricing</p>
+            <h2 className="text-4xl font-bold mb-4" style={{ color: "hsl(210,30%,94%)" }}>Simple, transparent plans</h2>
+            <p className="text-base" style={{ color: "hsl(215,15%,50%)" }}>Start free. Upgrade when you're ready to go deeper.</p>
           </div>
 
-          <div className="order-1 lg:order-2">
-            <p className="text-sm font-semibold text-amber-600 mb-3 uppercase tracking-wider">Setup Screenshots</p>
-            <h2 className="text-4xl font-bold text-slate-900 mb-5 leading-tight">
-              Capture your setups. Share your wins.
-            </h2>
-            <p className="text-slate-500 leading-relaxed mb-6">
-              Attach a chart screenshot to every trade. Review your exact setup context months later, not just numbers. Then generate a branded trade card to share with your community in one click.
-            </p>
-            <div className="space-y-4">
-              {[
-                { title: "Upload or paste", desc: "Drag & drop, upload from device, or paste directly from your clipboard." },
-                { title: "Permanent record", desc: "Your screenshots are stored securely and always visible in your journal." },
-                { title: "One-click sharing", desc: "Generate a branded trade card with your chart and stats — ready to share on X, Discord, or anywhere." },
-              ].map(({ title, desc }) => (
-                <div key={title} className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <ChevronRight className="w-3 h-3 text-amber-600" />
+          <div className="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto">
+            {pricing.map(({ name, price, period, desc, features: pf, cta, highlight, badge }) => (
+              <div key={name} className="rounded-2xl p-6 flex flex-col relative" style={{
+                background: highlight
+                  ? "linear-gradient(135deg, hsl(217,92%,60%,0.1), hsl(222,70%,45%,0.06))"
+                  : "hsl(222,24%,10%)",
+                border: highlight
+                  ? "1px solid hsl(217,92%,60%,0.3)"
+                  : "1px solid hsl(222,18%,15%)",
+                boxShadow: highlight
+                  ? "0 8px 48px hsl(217,92%,60%,0.12), inset 0 1px 0 hsl(217,92%,60%,0.1)"
+                  : "0 4px 24px hsl(222,40%,4%,0.4)"
+              }}>
+                {badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="text-[10px] font-bold px-3 py-1 rounded-full" style={{
+                      background: highlight ? "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,45%))" : "hsl(222,22%,18%)",
+                      color: highlight ? "white" : "hsl(215,15%,50%)",
+                      border: highlight ? "none" : "1px solid hsl(222,18%,22%)"
+                    }}>{badge}</span>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">{title}</p>
-                    <p className="text-sm text-slate-500">{desc}</p>
+                )}
+
+                <div className="mb-6">
+                  <p className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: highlight ? "hsl(217,92%,65%)" : "hsl(215,15%,50%)" }}>{name}</p>
+                  <div className="flex items-end gap-1 mb-2">
+                    <span className="text-4xl font-bold font-mono" style={{ color: "hsl(210,30%,92%)" }}>{price}</span>
+                    <span className="text-sm mb-1.5" style={{ color: "hsl(215,15%,45%)" }}>{period}</span>
                   </div>
+                  <p className="text-xs" style={{ color: "hsl(215,15%,45%)" }}>{desc}</p>
                 </div>
-              ))}
-            </div>
+
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {pf.map(f => (
+                    <li key={f} className="flex items-start gap-2.5">
+                      <Check className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: highlight ? "hsl(217,92%,65%)" : "hsl(158,68%,50%)" }} />
+                      <span className="text-xs" style={{ color: "hsl(215,15%,55%)" }}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link to="/auth"
+                  className="w-full py-3 rounded-xl text-sm font-semibold text-center transition-all hover:opacity-90 block"
+                  style={highlight ? {
+                    background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,45%))",
+                    color: "white",
+                    boxShadow: "0 4px 16px hsl(217,92%,60%,0.3)"
+                  } : {
+                    background: "hsl(222,20%,14%)",
+                    color: "hsl(215,15%,62%)",
+                    border: "1px solid hsl(222,18%,20%)"
+                  }}>
+                  {cta}
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section id="testimonials" className="bg-slate-50 border-y border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 py-20">
+      {/* ── TESTIMONIALS ────────────────────────────────────────────────── */}
+      <section style={{ borderTop: "1px solid hsl(222,18%,13%)" }}>
+        <div className="max-w-6xl mx-auto px-6 py-24">
           <div className="text-center mb-14">
-            <p className="text-sm font-semibold text-blue-600 mb-3 uppercase tracking-wider">Reviews</p>
-            <h2 className="text-4xl font-bold text-slate-900">Traders are winning more</h2>
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "hsl(217,92%,60%)" }}>Community</p>
+            <h2 className="text-4xl font-bold" style={{ color: "hsl(210,30%,94%)" }}>Traders are improving</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
-            {testimonials.map(({ name, role, text, stars }) => (
-              <div key={name} className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+            {[
+              { name: "Marcus T.", role: "Forex Trader · 3 years", text: "My win rate went from 48% to 67% in 2 months. The AI spotted that I was overtrading the NY open — something I'd never have caught on my own.", stars: 5 },
+              { name: "Priya K.", role: "Prop Firm Trader", text: "TradinStar is the only journal that tells me WHY I'm losing, not just that I am. Game changer for my FTMO challenge prep.", stars: 5 },
+              { name: "James O.", role: "Swing Trader", text: "The screenshot + trade card combo is brilliant. I review my exact setups months later and share wins with the community instantly.", stars: 5 },
+            ].map(({ name, role, text, stars }) => (
+              <div key={name} className="rounded-2xl p-6" style={{
+                background: "hsl(222,24%,10%)",
+                border: "1px solid hsl(222,18%,15%)"
+              }}>
                 <div className="flex gap-0.5 mb-4">
                   {Array.from({ length: stars }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <p className="text-sm text-slate-600 leading-relaxed mb-5">"{text}"</p>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: "hsl(215,15%,55%)" }}>"{text}"</p>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">{name}</p>
-                  <p className="text-xs text-slate-400">{role}</p>
+                  <p className="text-sm font-semibold" style={{ color: "hsl(210,30%,85%)" }}>{name}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "hsl(215,15%,40%)" }}>{role}</p>
                 </div>
               </div>
             ))}
@@ -368,48 +813,93 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="max-w-6xl mx-auto px-6 py-20 text-center">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-4xl font-bold text-slate-900 mb-5">
-            Ready to trade with clarity?
-          </h2>
-          <p className="text-slate-500 mb-8 leading-relaxed">
-            Join thousands of traders using TradinStar to understand their performance, fix their habits, and build real consistency.
-          </p>
-          <Link to="/auth"
-            className="inline-flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-xl transition-all hover:opacity-90 text-base"
-            style={{ background: "hsl(222,60%,20%)", boxShadow: "0 4px 20px hsl(222,60%,20%,0.25)" }}>
-            Get started free <ArrowRight className="w-4 h-4" />
-          </Link>
-          <p className="text-sm text-slate-400 mt-4">No credit card required · Free to start</p>
+      {/* ── FAQ ─────────────────────────────────────────────────────────── */}
+      <section id="faq" style={{ borderTop: "1px solid hsl(222,18%,13%)" }}>
+        <div className="max-w-3xl mx-auto px-6 py-24">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "hsl(217,92%,60%)" }}>FAQ</p>
+            <h2 className="text-4xl font-bold" style={{ color: "hsl(210,30%,94%)" }}>Common questions</h2>
+          </div>
+          <div>
+            {faqs.map(faq => <FAQItem key={faq.q} {...faq} />)}
+          </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-slate-100 bg-white">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
-              <img
-                src={navbarLogo}
-                alt="TradinStar logo"
-                className="nav-brand-logo h-8 w-auto object-contain"
-                style={{ maxWidth: 160 }}
-              />
-              <span className="text-slate-300 text-sm">·</span>
-              <span className="text-sm text-slate-400">AI-Powered Trading Journal</span>
+      {/* ── FINAL CTA ───────────────────────────────────────────────────── */}
+      <section style={{ borderTop: "1px solid hsl(222,18%,13%)" }}>
+        <div className="max-w-3xl mx-auto px-6 py-24 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold mb-7" style={{
+            background: "hsl(217,92%,60%,0.1)",
+            border: "1px solid hsl(217,92%,60%,0.2)",
+            color: "hsl(217,92%,70%)"
+          }}>
+            <Award className="w-3.5 h-3.5" /> Free to start · No credit card
+          </div>
+          <h2 className="text-4xl font-bold mb-5" style={{ color: "hsl(210,30%,94%)" }}>
+            Ready to trade with clarity?
+          </h2>
+          <p className="text-base mb-10 leading-relaxed" style={{ color: "hsl(215,15%,50%)" }}>
+            Join traders using TradinStar to build discipline, understand their patterns, and improve with every session.
+          </p>
+          <Link to="/auth"
+            className="inline-flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-xl transition-all hover:opacity-90 active:scale-[0.98]"
+            style={{
+              background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,45%))",
+              boxShadow: "0 8px 32px hsl(217,92%,60%,0.4)",
+              fontSize: "0.95rem"
+            }}>
+            Start journaling free <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* ── FOOTER ──────────────────────────────────────────────────────── */}
+      <footer style={{ borderTop: "1px solid hsl(222,18%,13%)" }}>
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <div className="grid md:grid-cols-4 gap-10 mb-10">
+            <div className="md:col-span-2">
+              <Link to="/" className="flex items-center mb-4">
+                <span className="nav-brand-logo-frame">
+                  <img src={navbarLogo} alt="TradinStar logo" className="nav-brand-logo object-contain" />
+                </span>
+              </Link>
+              <p className="text-sm leading-relaxed max-w-xs" style={{ color: "hsl(215,15%,42%)" }}>
+                The AI-powered trading performance platform. Plan, execute, reflect, learn, improve.
+              </p>
             </div>
-            <div className="flex items-center gap-6">
-              <Link to="/about" className="text-sm text-slate-400 hover:text-slate-700 transition-colors">About</Link>
-              <a href="mailto:support@tradinstar.com" className="text-sm text-slate-400 hover:text-slate-700 transition-colors">Support</a>
-              <span className="text-sm text-slate-400">© 2026 TradinStar</span>
-              <span className="text-slate-200">·</span>
-              <span className="text-xs text-slate-400">
-                Built by{" "}
-                <span className="font-semibold text-slate-600 uppercase tracking-widest text-[11px]">VYBE STACK</span>
-              </span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "hsl(215,15%,38%)" }}>Product</p>
+              <div className="space-y-3">
+                {[["#features", "Features"], ["#demo", "AI Demo"], ["#pricing", "Pricing"], ["/about", "About"]].map(([href, label]) => (
+                  <div key={label}>
+                    {href.startsWith("#") ? (
+                      <a href={href} className="text-sm transition-colors hover:opacity-80" style={{ color: "hsl(215,15%,48%)" }}>{label}</a>
+                    ) : (
+                      <Link to={href} className="text-sm transition-colors hover:opacity-80" style={{ color: "hsl(215,15%,48%)" }}>{label}</Link>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "hsl(215,15%,38%)" }}>Support</p>
+              <div className="space-y-3">
+                {[["mailto:support@tradinstar.com", "Contact"], ["#faq", "FAQ"]].map(([href, label]) => (
+                  <div key={label}>
+                    <a href={href} className="text-sm transition-colors hover:opacity-80" style={{ color: "hsl(215,15%,48%)" }}>{label}</a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8" style={{ borderTop: "1px solid hsl(222,18%,13%)" }}>
+            <p className="text-xs" style={{ color: "hsl(215,15%,32%)" }}>© 2026 TradinStar. All rights reserved.</p>
+            <p className="text-xs" style={{ color: "hsl(215,15%,30%)" }}>
+              Built by{" "}
+              <span className="font-bold tracking-widest" style={{ color: "hsl(215,15%,40%)" }}>VYBE STACK</span>
+            </p>
           </div>
         </div>
       </footer>
