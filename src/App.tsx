@@ -56,13 +56,15 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 // Onboarding route — must be logged in, but not gate on profile completion
 function OnboardingRoute() {
-  const { user, loading } = useAuth();
-  if (loading) return (
+  const { user, loading, traderProfile, profileLoading } = useAuth();
+  if (loading || profileLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
   if (!user) return <Navigate to="/auth" replace />;
+  // Already onboarded? Skip straight to the app — don't make returning users redo it.
+  if (traderProfile?.onboarding_completed) return <Navigate to="/dashboard" replace />;
   return <Onboarding />;
 }
 

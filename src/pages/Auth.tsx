@@ -96,7 +96,7 @@ export default function Auth() {
     setOauthLoading(provider);
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo: `${window.location.origin}/onboarding` },
     });
     if (error) {
       toast({ title: `${provider} sign-in failed`, description: error.message, variant: "destructive" });
@@ -123,7 +123,7 @@ export default function Auth() {
       email, password,
       options: {
         data: { display_name: displayName },
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/onboarding`,
       },
     });
     setLoading(false);
