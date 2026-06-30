@@ -200,11 +200,24 @@ export default function AICoach() {
 
   const systemPrompt = buildSystemPrompt(traderProfile, stats, trades);
 
+  const buildGreeting = () => {
+    const name = (user as any)?.user_metadata?.display_name?.split(" ")[0] || "trader";
+    if (!traderProfile?.experience) {
+      return "Hey! I'm your AI Coach. Complete your Trader DNA profile and start logging trades — I'll then give you personalised coaching, pattern detection, and weekly reviews.";
+    }
+    if (trades.length === 0) {
+      const style = traderProfile.trading_style?.replace("_", " ") ?? "trader";
+      const strategies = (traderProfile.strategies ?? []).slice(0, 2).join(" & ") || "your strategy";
+      const sessions = (traderProfile.trading_sessions ?? []).slice(0, 2).join(" & ") || "your sessions";
+      const assets = (traderProfile.favorite_assets ?? []).slice(0, 2).join(", ") || "your pairs";
+      return `Welcome back, ${name}. I can see you're ${traderProfile.experience === "intermediate" ? "an" : "a"} **${traderProfile.experience} ${style}** focused on **${strategies}** — primarily trading **${assets}** during the **${sessions}** session.\n\nOnce you start logging trades, I'll identify your patterns and help you improve your consistency. For now, ask me anything about your setup or strategy.`;
+    }
+    return `Hey ${name}! You have **${stats.totalTrades} trades** logged with a **${stats.winRate}% win rate** and **$${stats.totalPnL.toFixed(2)} total P&L**.\n\nI've analysed your history. Ask me anything or use a quick action below.`;
+  };
+
   const [messages, setMessages] = useState<Message[]>([{
     role: "assistant",
-    content: traderProfile?.experience
-      ? `Hey trader! I'm your AI Coach. I've loaded your profile — you're a **${traderProfile.trading_style?.replace("_", " ") ?? "trader"}** using **${(traderProfile.strategies ?? []).slice(0, 2).join(" & ") || "your strategy"}**.\n\nYou have **${stats.totalTrades} trades** logged with a **${stats.winRate}% win rate**. Ask me anything, or pick a quick action below.`
-      : "Hey trader! I'm your AI Coach. I can review your trades, analyze your patterns, and give you a personalized action plan. What do you want to work on?",
+    content: buildGreeting(),
   }]);
   const [input, setInput] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -266,7 +279,7 @@ export default function AICoach() {
       .replace(/\n/g, "<br/>");
 
   return (
-    <div className="max-w-lg mx-auto flex flex-col" style={{ height: "calc(100vh - 5rem)" }}>
+    <div className="max-w-lg mx-auto flex flex-col" style={{ height: "calc(100dvh - 3.5rem)", overflow: "hidden" }}>
 
       {/* ── HEADER ── */}
       <div className="px-4 pt-5 pb-3 shrink-0">

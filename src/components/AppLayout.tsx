@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, BookOpen, BarChart3, MessageCircle, Cog, Plus } from "lucide-react";
+import { LayoutDashboard, BookOpen, BarChart3, MessageCircle, UserCircle, Plus } from "lucide-react";
 import navbarLogo from "@/assets/images/navbar-logo.png";
 
 const tabs = [
@@ -57,8 +57,9 @@ export default function AppLayout() {
               <span className="text-[11px] font-bold">R%</span>
             </NavLink>
 
+            {/* Profile button (was Settings) */}
             <NavLink
-              to="/settings"
+              to="/profile"
               className={({ isActive }) =>
                 `w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
                   isActive ? "text-white" : "text-slate-500 hover:text-blue-400"
@@ -71,30 +72,18 @@ export default function AppLayout() {
                 background: "hsl(222,20%,13%)",
                 border: "1px solid hsl(222,18%,18%)",
               }}
-              title="Settings"
+              title="Profile"
             >
-              <Cog className="w-4 h-4" />
+              <UserCircle className="w-4 h-4" />
             </NavLink>
           </div>
         </div>
       </header>
 
       {/* ── PAGE CONTENT ── */}
-      <div className="flex-1 overflow-y-auto" style={{ paddingBottom: hideNav ? "0" : "88px" }}>
+      <div className="flex-1 overflow-y-auto" style={{ paddingBottom: hideNav ? "0" : "80px" }}>
         <Outlet />
       </div>
-
-      {/* ── VYBE STACK CREDIT ── */}
-      {!hideNav && (
-        <div
-          className="text-center pb-1 pt-0.5"
-          style={{ position: "fixed", bottom: "68px", left: 0, right: 0, zIndex: 49, pointerEvents: "none" }}
-        >
-          <span className="text-[9px] tracking-widest font-semibold" style={{ color: "hsl(215,15%,30%)" }}>
-            BUILT BY VYBE STACK
-          </span>
-        </div>
-      )}
 
       {/* ── BOTTOM NAV ── */}
       {!hideNav && (

@@ -1,0 +1,123 @@
+Attached Element Context from Integrated Browser
+
+Element: div.flex.items-center.gap-2.mb-1
+
+URL: http://localhost:8080/dashboard
+
+HTML Path: div#root > div.flex.flex-col.min-h-screen > div.flex-1.overflow-y-auto > div.max-w-lg.mx-auto.px-4.pt-8 > div.mb-8 > div.flex.items-center.gap-2.mb-1
+
+Outer HTML:
+```html
+<div class="flex items-center gap-2 mb-1"><div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background: rgb(20, 39, 82);"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap w-3.5 h-3.5 text-white"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg></div><h1 class="text-2xl font-bold tracking-tight" style="color: rgb(19, 23, 32);">TradinStar</h1></div>
+```
+
+Dimensions:
+- top: 89px
+- left: 71px
+- width: 480px
+- height: 36px
+
+CSS:
+```css
+*, ::before, ::after { --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ; }
+*, ::before, ::after { box-sizing: border-box; /* 1 */
+  border-width: 0; /* 2 */
+  border-style: solid; /* 2 */
+  border-color: #e5e7eb; /* 2 */ }
+* { border-color: hsl(var(--border)); }
+.mb-1 { margin-bottom: 0.25rem; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-2 { gap: 0.5rem; }
+
+/* Pseudo-elements */
+::before, ::after { --tw-content: ''; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Inherited */
+body { color: hsl(var(--foreground)); font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif }
+html, :host { line-height: 1.5; tab-size: 4 }
+
+/* Resolved values */
+border-radius: 0px;
+border: 0px solid rgb(226, 228, 233);
+align-items: center;
+background-attachment: scroll;
+background-clip: border-box;
+background-color: rgba(0, 0, 0, 0);
+background-image: none;
+background-origin: padding-box;
+background-position-x: 0%;
+background-position-y: 0%;
+background-repeat: repeat;
+background-size: auto;
+box-sizing: border-box;
+color: rgb(19, 23, 32);
+column-gap: 8px;
+display: flex;
+font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+font-feature-settings: normal;
+height: 32px;
+line-height: 24px;
+margin-bottom: 4px;
+row-gap: 8px;
+tab-size: 4;
+unicode-bidi: isolate /*UA*/;
+width: 480px;
+
+/* CSS variables */
+--border: 220 14% 90%;
+--foreground: 222 25% 10%;
+```
