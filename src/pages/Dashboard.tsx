@@ -248,100 +248,6 @@ function NewUserEmptyState() {
 }
 
 
-// ── First-Time Setup Checklist ────────────────────────────────────────────
-function SetupChecklist({ trades, traderProfile, hasAIReview }: {
-  trades: any[];
-  traderProfile: any;
-  hasAIReview: boolean;
-}) {
-  const hasProfile    = !!(traderProfile?.experience);
-  const hasFirstTrade = trades.length > 0;
-  const hasChart      = trades.some((t: any) => !!t.screenshot);
-  const hasWeekly     = false; // future phase
-
-  const steps = [
-    { label: "Complete Trader DNA",        done: hasProfile,    to: "/onboarding", accent: "hsl(217,92%,60%)" },
-    { label: "Log your first trade",        done: hasFirstTrade, to: "/log",        accent: "hsl(158,68%,46%)" },
-    { label: "Upload your first chart",     done: hasChart,      to: "/log",        accent: "hsl(158,68%,46%)" },
-    { label: "Get your first AI review",    done: hasAIReview,   to: "/coach",      accent: "hsl(280,65%,62%)" },
-    { label: "Complete a weekly review",    done: hasWeekly,     to: "/coach",      accent: "hsl(38,92%,56%)" },
-  ];
-
-  const completed = steps.filter(s => s.done).length;
-  if (completed === steps.length) return null; // hide once all done
-
-  const pct = Math.round((completed / steps.length) * 100);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.15 }}
-      className="rounded-2xl p-5 mb-5"
-      style={{
-        background: "hsl(222,22%,10%)",
-        border: "1px solid hsl(222,18%,15%)",
-        boxShadow: "0 4px 20px hsl(222,40%,4%,0.5)",
-      }}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "hsl(215,15%,38%)" }}>
-            Getting started
-          </p>
-          <p className="text-[11px] mt-0.5" style={{ color: "hsl(215,15%,32%)" }}>
-            {completed} of {steps.length} complete
-          </p>
-        </div>
-        <span className="text-sm font-bold font-mono" style={{ color: "hsl(158,68%,55%)" }}>{pct}%</span>
-      </div>
-
-      {/* Progress bar */}
-      <div className="h-1.5 rounded-full mb-4" style={{ background: "hsl(222,20%,16%)" }}>
-        <div
-          className="h-1.5 rounded-full transition-all duration-700"
-          style={{
-            width: `${pct}%`,
-            background: "linear-gradient(90deg, hsl(217,92%,60%), hsl(158,68%,46%))"
-          }}
-        />
-      </div>
-
-      {/* Steps */}
-      <div className="space-y-2.5">
-        {steps.map(({ label, done, to, accent }) => (
-          <Link key={label} to={done ? "#" : to}
-            className={`flex items-center gap-3 ${done ? "pointer-events-none" : "group"}`}
-          >
-            <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-all"
-              style={done ? {
-                background: "hsl(158,68%,46%,0.15)",
-                border: "1.5px solid hsl(158,68%,46%)"
-              } : {
-                background: "hsl(222,20%,15%)",
-                border: "1.5px solid hsl(222,18%,22%)"
-              }}>
-              {done
-                ? <Check className="w-3 h-3" style={{ color: "hsl(158,68%,55%)" }} />
-                : <div className="w-1.5 h-1.5 rounded-full" style={{ background: "hsl(222,18%,28%)" }} />
-              }
-            </div>
-            <span className="text-xs font-semibold transition-colors"
-              style={{ color: done ? "hsl(215,15%,38%)" : "hsl(210,20%,72%)" }}>
-              {done ? <s>{label}</s> : label}
-            </span>
-            {!done && (
-              <ChevronRight className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-60 transition-opacity"
-                style={{ color: accent }} />
-            )}
-          </Link>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Main Dashboard
 // ─────────────────────────────────────────────────────────────────────────────
@@ -509,13 +415,6 @@ export default function Dashboard() {
 
       {/* ── TRADER DNA ── */}
       <TraderDNACard />
-
-      {/* ── SETUP CHECKLIST ── */}
-      <SetupChecklist
-        trades={trades}
-        traderProfile={traderProfile}
-        hasAIReview={false}
-      />
 
       {/* ── STAT CARDS ── */}
       {trades.length > 0 && (

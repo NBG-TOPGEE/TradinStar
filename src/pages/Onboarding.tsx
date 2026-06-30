@@ -162,7 +162,7 @@ const STEPS = [
 // Main Onboarding component
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Onboarding() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<TraderProfile>(DEFAULTS);
@@ -206,6 +206,7 @@ export default function Onboarding() {
           onboarding_step: STEPS.length,
         });
       if (error) throw error;
+      await refreshProfile();
       toast.success("Your Trader Profile is ready!");
       navigate("/dashboard");
     } catch (err: any) {
@@ -403,18 +404,9 @@ export default function Onboarding() {
         <span className="nav-brand-logo-frame">
           <img src={navbarLogo} alt="TradinStar" className="nav-brand-logo object-contain" />
         </span>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono" style={{ color: "hsl(215,15%,38%)" }}>
-            {step + 1} / {STEPS.length}
-          </span>
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="text-xs transition-colors hover:opacity-80"
-            style={{ color: "hsl(215,15%,35%)" }}
-          >
-            Skip →
-          </button>
-        </div>
+        <span className="text-xs font-mono" style={{ color: "hsl(215,15%,38%)" }}>
+          {step + 1} / {STEPS.length}
+        </span>
       </div>
 
       {/* Progress bar */}

@@ -48,6 +48,38 @@ const GoogleIcon = () => (
   </svg>
 );
 
+// ── Shared input element (module-level — must NOT be redefined per render) ──
+function Inp({
+  type = "text", icon: Icon, value, onChange, placeholder, required = true, minLength, right
+}: {
+  type?: string; icon: any; value: string; onChange: (v: string) => void;
+  placeholder: string; required?: boolean; minLength?: number; right?: React.ReactNode;
+}) {
+  return (
+    <div className="relative">
+      <Icon className="absolute left-3 top-3.5 h-4 w-4" style={{ color: "hsl(215,15%,38%)" }} />
+      <input
+        type={type} value={value} onChange={e => onChange(e.target.value)}
+        placeholder={placeholder} required={required} minLength={minLength}
+        style={{ ...INPUT, paddingRight: right ? "2.75rem" : "1rem" }}
+        onFocus={e => InputFocus(e.currentTarget, true)}
+        onBlur={e => InputFocus(e.currentTarget, false)}
+      />
+      {right && <div className="absolute right-3 top-3.5">{right}</div>}
+    </div>
+  );
+}
+
+function PrimaryBtn({ children, disabled }: { children: React.ReactNode; disabled?: boolean }) {
+  return (
+    <button type="submit" disabled={disabled}
+      className="w-full py-3.5 rounded-xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+      style={{ background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,40%))", boxShadow: "0 4px 20px hsl(217,92%,60%,0.4)" }}>
+      {children}
+    </button>
+  );
+}
+
 export default function Auth() {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail]           = useState("");
@@ -111,33 +143,7 @@ export default function Auth() {
     else { toast({ title: "Check your email", description: "Reset link sent." }); setMode("login"); }
   };
 
-  // ── Shared input element ───────────────────────────────────────────────
-  const Inp = ({
-    type = "text", icon: Icon, value, onChange, placeholder, required = true, minLength, right
-  }: {
-    type?: string; icon: any; value: string; onChange: (v: string) => void;
-    placeholder: string; required?: boolean; minLength?: number; right?: React.ReactNode;
-  }) => (
-    <div className="relative">
-      <Icon className="absolute left-3 top-3.5 h-4 w-4" style={{ color: "hsl(215,15%,38%)" }} />
-      <input
-        type={type} value={value} onChange={e => onChange(e.target.value)}
-        placeholder={placeholder} required={required} minLength={minLength}
-        style={{ ...INPUT, paddingRight: right ? "2.75rem" : "1rem" }}
-        onFocus={e => InputFocus(e.currentTarget, true)}
-        onBlur={e => InputFocus(e.currentTarget, false)}
-      />
-      {right && <div className="absolute right-3 top-3.5">{right}</div>}
-    </div>
-  );
-
-  const PrimaryBtn = ({ children, disabled }: { children: React.ReactNode; disabled?: boolean }) => (
-    <button type="submit" disabled={disabled}
-      className="w-full py-3.5 rounded-xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
-      style={{ background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,40%))", boxShadow: "0 4px 20px hsl(217,92%,60%,0.4)" }}>
-      {children}
-    </button>
-  );
+  // (Inp and PrimaryBtn are defined outside the component — see below)
 
   if (mode === "forgot") return (
     <div className="min-h-screen flex items-center justify-center px-4 ambient-bg">
