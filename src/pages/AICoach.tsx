@@ -194,7 +194,7 @@ function CoachingPanel({ trades, stats, traderProfile, onPrompt }: {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function AICoach() {
   const { trades } = useTrades();
-  const { traderProfile } = useAuth();
+  const { traderProfile, user } = useAuth();
   const stats = getStats(trades);
   const { chat, analyzeImage, loading: aiLoading, error: aiError } = useGemini();
 

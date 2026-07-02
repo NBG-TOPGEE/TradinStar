@@ -398,6 +398,47 @@ export default function Profile() {
       {/* ── TRADER DNA ── */}
       {active === "trader" && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          {/* ── DNA Summary (from onboarding) ── */}
+          {traderProfile?.experience && (
+            <div className="rounded-2xl p-5 mb-4" style={{
+              background: "linear-gradient(135deg, hsl(217,92%,60%,0.07), hsl(222,70%,45%,0.04))",
+              border: "1px solid hsl(217,92%,60%,0.14)",
+              boxShadow: "0 4px 24px hsl(222,40%,4%,0.4)",
+            }}>
+              <div className="flex items-center gap-2 mb-4">
+                <CircleDot className="w-4 h-4" style={{ color: "hsl(217,92%,60%)" }} />
+                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "hsl(217,92%,60%)" }}>
+                  Trader DNA
+                </span>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { label: "Experience", value: traderProfile.experience?.charAt(0).toUpperCase() + traderProfile.experience?.slice(1) },
+                  { label: "Style",      value: ({"scalping":"Scalper","day_trading":"Day Trader","swing_trading":"Swing Trader","position_trading":"Position Trader"} as any)[traderProfile.trading_style] ?? traderProfile.trading_style },
+                  { label: "Strategy",   value: traderProfile.strategies?.[0] ?? "—" },
+                  { label: "Risk / RR",  value: traderProfile.risk_per_trade ? `${traderProfile.risk_per_trade}% / 1:${traderProfile.preferred_rr}` : "—" },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex items-center justify-between py-1.5"
+                    style={{ borderBottom: "1px solid hsl(222,18%,14%)" }}>
+                    <span className="text-xs" style={{ color: "hsl(215,15%,38%)" }}>{label}</span>
+                    <span className="text-xs font-semibold" style={{ color: "hsl(210,25%,75%)" }}>{value}</span>
+                  </div>
+                ))}
+              </div>
+              {traderProfile.goals?.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {traderProfile.goals.slice(0, 4).map((g: string) => (
+                    <span key={g} className="text-[10px] px-2 py-0.5 rounded-lg font-medium" style={{
+                      background: "hsl(217,92%,60%,0.1)",
+                      color: "hsl(217,92%,65%)",
+                      border: "1px solid hsl(217,92%,60%,0.18)"
+                    }}>{g}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <SCard title="Trader DNA" icon={CircleDot} accent="hsl(217,92%,60%)">
             <div>
               <label style={LABEL}>Experience Level</label>

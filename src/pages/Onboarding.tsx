@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight, ChevronLeft, Check, Zap, BookOpen,
-  BarChart3, Brain, Target, Clock, Shield, TrendingUp
+  BarChart3, Brain, Target, Clock, TrendingUp
 } from "lucide-react";
 import navbarLogo from "@/assets/images/navbar-logo.png";
 
@@ -42,6 +42,31 @@ const DEFAULTS: TraderProfile = {
   max_daily_loss: 5,
   goals: [],
 };
+
+const DRAFT_KEY = "tradinstar_onboarding_draft";
+
+interface Draft {
+  step: number;
+  profile: TraderProfile;
+}
+
+function saveDraft(step: number, profile: TraderProfile) {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, profile }));
+  } catch {}
+}
+
+function loadDraft(): Draft | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as Draft;
+  } catch { return null; }
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY); } catch {}
+}
 
 // ── Chip selector ─────────────────────────────────────────────────────────
 function Chip({
@@ -96,7 +121,7 @@ function OptionCard({
           <Icon className="w-4 h-4" style={{ color: selected ? accent : "hsl(215,15%,42%)" }} />
         </div>
       )}
-      <div>
+      <div className="flex-1">
         <p className="text-sm font-bold" style={{ color: selected ? "hsl(210,30%,92%)" : "hsl(210,20%,70%)" }}>{label}</p>
         {desc && <p className="text-xs mt-0.5 leading-relaxed" style={{ color: "hsl(215,15%,42%)" }}>{desc}</p>}
       </div>
@@ -149,13 +174,18 @@ function NumberInput({
 
 // ── Step config ───────────────────────────────────────────────────────────
 const STEPS = [
-  "Experience",
-  "Style",
-  "Markets",
-  "Strategy",
-  "Assets & Sessions",
-  "Risk Profile",
-  "Goals",
+  "Experience", "Style", "Markets", "Strategy",
+  "Assets & Sessions", "Risk Profile", "Goals",
+];
+
+const STEP_TITLES = [
+  { title: "What's your experience level?", sub: "Be honest — this shapes how your AI coach talks to you." },
+  { title: "How do you trade?", sub: "Your style determines which analytics matter most." },
+  { title: "What markets do you trade?", sub: "You can always add more later." },
+  { title: "What strategies do you use?", sub: "Select every approach you apply regularly." },
+  { title: "Your assets, sessions & platform", sub: "This builds the core of your Trader DNA." },
+  { title: "Define your risk profile", sub: "These limits will be used by the AI Coach and Risk Calculator." },
+  { title: "What are your trading goals?", sub: "Your AI Coach will track progress toward these targets." },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -164,10 +194,18 @@ const STEPS = [
 export default function Onboarding() {
   const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
-  const [profile, setProfile] = useState<TraderProfile>(DEFAULTS);
   const [saving, setSaving] = useState(false);
-  const [dir, setDir] = useState(1); // 1 = forward, -1 = back
+  const [dir, setDir] = useState(1);
+
+  // ── Restore draft on mount ───────────────────────────────────────────
+  const draft = loadDraft();
+  const [step, setStep] = useState(draft?.step ?? 0);
+  const [profile, setProfile] = useState<TraderProfile>(draft?.profile ?? DEFAULTS);
+
+  // Persist draft whenever step or profile changes
+  useEffect(() => {
+    saveDraft(step, profile);
+  }, [step, profile]);
 
   const update = <K extends keyof TraderProfile>(key: K, val: TraderProfile[K]) =>
     setProfile(p => ({ ...p, [key]: val }));
@@ -206,6 +244,7 @@ export default function Onboarding() {
           onboarding_step: STEPS.length,
         });
       if (error) throw error;
+      clearDraft();
       await refreshProfile();
       toast.success("Your Trader Profile is ready!");
       navigate("/dashboard");
@@ -221,10 +260,8 @@ export default function Onboarding() {
     exit: (d: number) => ({ x: d > 0 ? -40 : 40, opacity: 0 }),
   };
 
-  // ── Step content ─────────────────────────────────────────────────────
   const renderStep = () => {
     switch (step) {
-
       case 0: return (
         <div className="space-y-3">
           {[
@@ -238,7 +275,6 @@ export default function Onboarding() {
           ))}
         </div>
       );
-
       case 1: return (
         <div className="space-y-3">
           {[
@@ -253,7 +289,6 @@ export default function Onboarding() {
           ))}
         </div>
       );
-
       case 2: return (
         <div>
           <p className="text-xs mb-4" style={{ color: "hsl(215,15%,45%)" }}>Select all that apply</p>
@@ -265,7 +300,6 @@ export default function Onboarding() {
           </div>
         </div>
       );
-
       case 3: return (
         <div>
           <p className="text-xs mb-4" style={{ color: "hsl(215,15%,45%)" }}>Select all strategies you use</p>
@@ -282,7 +316,6 @@ export default function Onboarding() {
           </div>
         </div>
       );
-
       case 4: return (
         <div className="space-y-6">
           <div>
@@ -333,45 +366,26 @@ export default function Onboarding() {
           </div>
         </div>
       );
-
       case 5: return (
         <div className="space-y-4">
-          <NumberInput
-            label="Risk per trade"
-            value={profile.risk_per_trade}
-            onChange={v => update("risk_per_trade", v)}
-            min={0.25} max={10} step={0.25} suffix="%" />
-          <NumberInput
-            label="Preferred Risk:Reward"
-            value={profile.preferred_rr}
-            onChange={v => update("preferred_rr", v)}
-            min={1} max={10} step={0.5} suffix=":1" />
-          <NumberInput
-            label="Max trades per day"
-            value={profile.max_trades_per_day}
-            onChange={v => update("max_trades_per_day", v)}
-            min={1} max={20} step={1} />
-          <NumberInput
-            label="Max daily loss"
-            value={profile.max_daily_loss}
-            onChange={v => update("max_daily_loss", v)}
-            min={1} max={20} step={0.5} suffix="%" />
+          <NumberInput label="Risk per trade" value={profile.risk_per_trade}
+            onChange={v => update("risk_per_trade", v)} min={0.25} max={10} step={0.25} suffix="%" />
+          <NumberInput label="Preferred Risk:Reward" value={profile.preferred_rr}
+            onChange={v => update("preferred_rr", v)} min={1} max={10} step={0.5} suffix=":1" />
+          <NumberInput label="Max trades per day" value={profile.max_trades_per_day}
+            onChange={v => update("max_trades_per_day", v)} min={1} max={20} step={1} />
+          <NumberInput label="Max daily loss" value={profile.max_daily_loss}
+            onChange={v => update("max_daily_loss", v)} min={1} max={20} step={0.5} suffix="%" />
         </div>
       );
-
       case 6: return (
         <div>
           <p className="text-xs mb-4" style={{ color: "hsl(215,15%,45%)" }}>Select all that apply</p>
           <div className="flex flex-wrap gap-2.5">
             {[
-              "Become consistent",
-              "Pass a funded challenge",
-              "Improve discipline",
-              "Reduce emotional trading",
-              "Improve psychology",
-              "Increase profitability",
-              "Build a trading system",
-              "Trade full-time",
+              "Become consistent", "Pass a funded challenge", "Improve discipline",
+              "Reduce emotional trading", "Improve psychology", "Increase profitability",
+              "Build a trading system", "Trade full-time",
             ].map(g => (
               <Chip key={g} label={g} selected={profile.goals.includes(g)}
                 onClick={() => toggleArr("goals", g)}
@@ -380,22 +394,11 @@ export default function Onboarding() {
           </div>
         </div>
       );
-
       default: return null;
     }
   };
 
-  const stepTitles = [
-    { title: "What's your experience level?", sub: "Be honest — this shapes how your AI coach talks to you." },
-    { title: "How do you trade?", sub: "Your style determines which analytics matter most." },
-    { title: "What markets do you trade?", sub: "You can always add more later." },
-    { title: "What strategies do you use?", sub: "Select every approach you apply regularly." },
-    { title: "Your assets, sessions & platform", sub: "This builds the core of your Trader DNA." },
-    { title: "Define your risk profile", sub: "These limits will be used by the AI Coach and Risk Calculator." },
-    { title: "What are your trading goals?", sub: "Your AI Coach will track progress toward these targets." },
-  ];
-
-  const progress = ((step) / STEPS.length) * 100;
+  const progress = (step / STEPS.length) * 100;
 
   return (
     <div className="min-h-screen flex flex-col ambient-bg" style={{ fontFamily: "'Sora', sans-serif" }}>
@@ -440,10 +443,10 @@ export default function Onboarding() {
               <div className="h-px flex-1" style={{ background: "hsl(222,18%,16%)" }} />
             </div>
             <h2 className="text-2xl font-bold mb-2" style={{ color: "hsl(210,30%,93%)" }}>
-              {stepTitles[step].title}
+              {STEP_TITLES[step].title}
             </h2>
             <p className="text-sm" style={{ color: "hsl(215,15%,48%)" }}>
-              {stepTitles[step].sub}
+              {STEP_TITLES[step].sub}
             </p>
           </motion.div>
         </div>
@@ -468,41 +471,29 @@ export default function Onboarding() {
         {/* Navigation */}
         <div className="pt-5 flex gap-3" style={{ borderTop: "1px solid hsl(222,18%,14%)" }}>
           {step > 0 && (
-            <button
-              onClick={goBack}
+            <button onClick={goBack}
               className="flex items-center gap-1.5 px-5 py-3 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
-              style={{
-                background: "hsl(222,20%,13%)",
-                border: "1px solid hsl(222,18%,18%)",
-                color: "hsl(215,15%,55%)"
-              }}
-            >
+              style={{ background: "hsl(222,20%,13%)", border: "1px solid hsl(222,18%,18%)", color: "hsl(215,15%,55%)" }}>
               <ChevronLeft className="w-4 h-4" /> Back
             </button>
           )}
 
           {step < STEPS.length - 1 ? (
-            <button
-              onClick={goNext}
-              disabled={!canAdvance()}
+            <button onClick={goNext} disabled={!canAdvance()}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
                 background: "linear-gradient(135deg, hsl(217,92%,60%), hsl(222,70%,45%))",
                 boxShadow: canAdvance() ? "0 4px 20px hsl(217,92%,60%,0.35)" : "none"
-              }}
-            >
+              }}>
               Continue <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
-            <button
-              onClick={handleFinish}
-              disabled={!canAdvance() || saving}
+            <button onClick={handleFinish} disabled={!canAdvance() || saving}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40"
               style={{
                 background: "linear-gradient(135deg, hsl(158,68%,46%), hsl(158,60%,38%))",
                 boxShadow: "0 4px 20px hsl(158,68%,46%,0.35)"
-              }}
-            >
+              }}>
               {saving ? (
                 <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</>
               ) : (
@@ -512,7 +503,6 @@ export default function Onboarding() {
           )}
         </div>
 
-        {/* VYBE STACK credit */}
         <p className="text-center text-[9px] tracking-widest mt-4" style={{ color: "hsl(215,15%,25%)" }}>
           BUILT BY <span className="font-bold" style={{ color: "hsl(215,15%,30%)" }}>VYBE STACK</span>
         </p>
