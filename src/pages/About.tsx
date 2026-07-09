@@ -16,7 +16,7 @@ const timeline = [
   {
     year: "The Build",
     title: "TradinStar is born",
-    desc: "Built under VYBE STACK by a forex trader who was tired of guessing. Every feature exists because it was needed — fast logging, screenshot capture, AI coaching, risk calculation. Nothing bloated. Nothing generic.",
+    desc: "Built under VERTODEA by a forex trader who was tired of guessing. Every feature exists because it was needed — fast logging, screenshot capture, AI coaching, risk calculation. Nothing bloated. Nothing generic.",
   },
 ];
 
@@ -136,13 +136,13 @@ export default function About() {
         </div>
       </section>
 
-      {/* VYBE STACK CALLOUT */}
+      {/* VERTODEA CALLOUT */}
       <section className="max-w-4xl mx-auto px-6 py-20">
         <div className="bg-slate-900 rounded-2xl p-10 text-center">
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Part of</p>
-          <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">VYBE STACK</h2>
+          <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">VERTODEA</h2>
           <p className="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed mb-6">
-            TradinStar is a product of VYBE STACK — a software and creative company building focused tools for real people. Every product is minimal, purposeful, and built to last.
+            TradinStar is a product of VERTODEA — a software and creative company building focused tools for real people. Every product is minimal, purposeful, and built to last.
           </p>
           <a
             href="https://github.com/NBG-TOPGEE"
@@ -198,7 +198,7 @@ export default function About() {
               <span className="text-slate-200">·</span>
               <span className="text-xs text-slate-400">
                 Built by{" "}
-                <span className="font-semibold text-slate-600 uppercase tracking-widest text-[11px]">VYBE STACK</span>
+                <span className="font-semibold text-slate-600 uppercase tracking-widest text-[11px]">VERTODEA</span>
               </span>
             </div>
           </div>

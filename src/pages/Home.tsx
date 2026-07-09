@@ -898,7 +898,7 @@ export default function Home() {
             <p className="text-xs" style={{ color: "hsl(215,15%,32%)" }}>© 2026 TradinStar. All rights reserved.</p>
             <p className="text-xs" style={{ color: "hsl(215,15%,30%)" }}>
               Built by{" "}
-              <span className="font-bold tracking-widest" style={{ color: "hsl(215,15%,40%)" }}>VYBE STACK</span>
+              <span className="font-bold tracking-widest" style={{ color: "hsl(215,15%,40%)" }}>VERTODEA</span>
             </p>
           </div>
         </div>

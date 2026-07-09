@@ -504,7 +504,7 @@ export default function Onboarding() {
         </div>
 
         <p className="text-center text-[9px] tracking-widest mt-4" style={{ color: "hsl(215,15%,25%)" }}>
-          BUILT BY <span className="font-bold" style={{ color: "hsl(215,15%,30%)" }}>VYBE STACK</span>
+          BUILT BY <span className="font-bold" style={{ color: "hsl(215,15%,30%)" }}>VERTODEA</span>
         </p>
       </div>
     </div>

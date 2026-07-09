@@ -61,7 +61,7 @@ const NAV: { id: Section; label: string; icon: any }[] = [
 const VybeCredit = () => (
   <div className="text-center py-4 mt-2">
     <p className="text-[10px] tracking-widest" style={{ color: "hsl(215,15%,22%)" }}>
-      BUILT BY <span className="font-bold" style={{ color: "hsl(215,15%,28%)" }}>VYBE STACK</span>
+      BUILT BY <span className="font-bold" style={{ color: "hsl(215,15%,28%)" }}>VERTODEA</span>
     </p>
   </div>
 );

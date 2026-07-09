@@ -257,7 +257,7 @@ export default function Auth() {
 
         {/* Footer branding */}
         <p className="mt-5 text-center text-xs tracking-widest" style={{ color: "hsl(215,15%,22%)" }}>
-          BUILT BY <span className="font-bold" style={{ color: "hsl(215,15%,28%)" }}>VYBE STACK</span>
+          BUILT BY <span className="font-bold" style={{ color: "hsl(215,15%,28%)" }}>VERTODEA</span>
         </p>
       </div>
     </div>
